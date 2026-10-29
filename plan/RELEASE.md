@@ -9,4 +9,4 @@ Maintainer guide for tag-based GitHub Releases. Policy: [VERSIONING.md](../VERSI
 3. Tag and push: `git tag v0.1.0 && git push origin v0.1.0`
 4. Confirm the Release workflow and GitHub Releases page.
 
-NuGet publishing is not configured in this template. Use [dotnet-api-client-template](https://github.com/markheydon/dotnet-api-client-template) or add `dotnet pack` / Trusted Publishing to `release.yml` when needed.
+NuGet publishing is not configured because this is an application rather than a package.

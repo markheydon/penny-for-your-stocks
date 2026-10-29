@@ -1,12 +1,12 @@
-# C# OSS project template
+# Penny For Your Stocks
 
-GitHub template for **Mark Heydon**-style open source .NET repositories: governance markdown, Cursor agent rules, CI, optional GitHub Releases on tags, and xUnit v3 tests. Works for class libraries, Blazor packages, tools, or apps — not only HTTP clients.
+An experimental stock analysis and trading application that attempts to identify modest trading opportunities using market data, a bit of logic and an appropriate amount of scepticism.
 
-**Using this template:** click **Use this template** on GitHub, then follow [TEMPLATE.md](TEMPLATE.md).
+Built primarily because apparently simply asking shares to go up isn't a viable investment strategy.
 
-**HTTP API client SDK?** Start from [dotnet-api-client-template](https://github.com/markheydon/dotnet-api-client-template) instead (NuGet, typed `HttpClient`, sample console, Pages docs).
+The project is at an early stage. This repository currently contains the .NET solution and test scaffolding; it is not yet a usable trading system. It is experimental and makes no promise of returns.
 
-## Quick start
+## Development
 
 ```bash
 dotnet build Repo.slnx -c Release -warnaserror
@@ -17,10 +17,11 @@ dotnet test Repo.slnx -c Release --no-build
 
 | Path | Purpose |
 |------|---------|
-| `GOALS.md`, `SCOPE.md`, `CONVENTIONS.md` | Product and coding context for humans and agents |
-| `AGENTS.md` | Cursor agent operating rules |
-| `.cursor/rules/` | File-scoped agent constraints |
-| `.agents/skills/` | Project skills (ADR, docs, PR review) |
+| `src/PennyForYourStocks/` | Application code |
+| `tests/PennyForYourStocks.Tests/` | Automated tests |
+| `GOALS.md`, `SCOPE.md`, `CONVENTIONS.md` | Product and coding context |
+| `AGENTS.md`, `.cursor/rules/` | AI agent operating rules |
+| `.agents/skills/` | Project-specific agent workflows |
 | `plan/` | Release and PR policy |
 | `adr/` | Architectural decision records |
 

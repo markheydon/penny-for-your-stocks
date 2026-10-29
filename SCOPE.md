@@ -1,21 +1,20 @@
 # Scope
 
-**Project:** Acme.Project
-**Last updated:** (date)
+**Project:** Penny For Your Stocks
+**Last updated:** 2026-10-29
 
 ---
 
-## In Scope — v1.0
+## In Scope — Initial Direction
 
-- …
+- An experimental application for stock analysis and trading.
+- Using market data and cautious logic to explore modest trading opportunities.
 
 ---
 
 ## Out of Scope
 
-Do not implement without an explicit scope change.
-
-- …
+No additional exclusions have been agreed yet. Specific requirements, data providers, analysis methods, and trading capabilities remain to be decided.
 
 ---
 
@@ -23,4 +22,4 @@ Do not implement without an explicit scope change.
 
 | Date | Change | Reason |
 |---|---|---|
-| (date) | Initial draft from csharp-oss-template | New repository |
+| 2026-10-29 | Adapted project scope from the repository template | Establish the initial product boundaries |
