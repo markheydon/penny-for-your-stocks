@@ -49,9 +49,9 @@ Follow [plan/PULL_REQUEST_POLICY.md](plan/PULL_REQUEST_POLICY.md) and [`.github/
 Before opening a PR:
 
 ```bash
-dotnet format Repo.slnx --verify-no-changes
-dotnet build Repo.slnx -c Release -warnaserror
-dotnet test Repo.slnx -c Release --no-build
+dotnet format PennyForYourStocks.slnx --verify-no-changes
+dotnet build PennyForYourStocks.slnx -c Release -warnaserror
+dotnet test PennyForYourStocks.slnx -c Release --no-build
 ```
 
 Title shape: `[Type] Imperative summary (#NNN)` with labels from [plan/LABEL_STRATEGY.md](plan/LABEL_STRATEGY.md).

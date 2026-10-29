@@ -34,10 +34,10 @@ jobs:
             10.0.x
 
       - name: Restore
-        run: dotnet restore Repo.slnx
+        run: dotnet restore PennyForYourStocks.slnx
 
       - name: Verify formatting
-        run: dotnet format Repo.slnx --no-restore --verify-no-changes --verbosity minimal
+        run: dotnet format PennyForYourStocks.slnx --no-restore --verify-no-changes --verbosity minimal
 
   build-and-test:
     name: Build & Test
@@ -58,10 +58,10 @@ jobs:
 
       - name: Clean, restore, build, and test
         run: |
-          dotnet clean Repo.slnx
-          dotnet restore Repo.slnx
-          dotnet build Repo.slnx --no-restore --configuration Release -warnaserror
-          dotnet test Repo.slnx --no-build --configuration Release --report-trx --results-directory TestResults
+          dotnet clean PennyForYourStocks.slnx
+          dotnet restore PennyForYourStocks.slnx
+          dotnet build PennyForYourStocks.slnx --no-restore --configuration Release -warnaserror
+          dotnet test PennyForYourStocks.slnx --no-build --configuration Release --report-trx --results-directory TestResults
 
       - name: Upload test results
         uses: actions/upload-artifact@v7

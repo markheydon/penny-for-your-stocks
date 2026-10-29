@@ -61,10 +61,10 @@ body:
     id: goals
     attributes:
       label: Goal links
-      description: Link relevant goals from GOALS.md (for example G1, G2)
+      description: Quote or paraphrase relevant bullets from GOALS.md (for example under Goals or Success Looks Like)
       placeholder: |
-        - G2 (...)
-        - G5 (...)
+        - Weekly check log entries with explicit costs
+        - Milestone reviews at 3, 12, and 18 months
     validations:
       required: true
   - type: textarea

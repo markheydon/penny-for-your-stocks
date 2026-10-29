@@ -61,10 +61,9 @@ body:
     id: goals
     attributes:
       label: Goal links
-      description: Link relevant goals from GOALS.md (for example G4, G5)
+      description: Quote or paraphrase relevant bullets from GOALS.md where the chore supports product or engineering goals
       placeholder: |
-        - G4 (...)
-        - G5 (...)
+        - Keep CI and formatting gates aligned with PennyForYourStocks.slnx
     validations:
       required: true
   - type: textarea

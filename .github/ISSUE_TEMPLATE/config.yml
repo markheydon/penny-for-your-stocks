@@ -1,14 +1,11 @@
 blank_issues_enabled: false
 contact_links:
   - name: Support Policy
-    url: https://github.com/markheydon/dns-check-dotnet/blob/main/SUPPORT.md
+    url: https://github.com/markheydon/penny-for-your-stocks/blob/main/SUPPORT.md
     about: Read support routing and expectations before opening an issue.
   - name: Usage Questions and Support
-    url: https://github.com/markheydon/dns-check-dotnet/discussions
+    url: https://github.com/markheydon/penny-for-your-stocks/discussions
     about: Ask setup and usage questions, or start a discussion before opening a new issue.
   - name: Security Vulnerability Reporting
-    url: https://github.com/markheydon/dns-check-dotnet/security/policy
+    url: https://github.com/markheydon/penny-for-your-stocks/security/policy
     about: Report vulnerabilities privately and review the disclosure policy.
-  - name: DNS Check API documentation
-    url: https://www.dnscheck.co/api
-    about: Official DNS Check monitoring API docs.

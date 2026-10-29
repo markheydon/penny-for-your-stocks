@@ -7,6 +7,8 @@
 
 When in doubt, follow this file. Significant architecture changes need an ADR.
 
+Product boundaries (share recommendations, broker integration, market data feeds, and related exclusions) are defined in `SCOPE.md`. User-facing copy and features must stay within those limits.
+
 ---
 
 ## Project Structure

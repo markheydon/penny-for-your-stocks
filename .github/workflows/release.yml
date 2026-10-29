@@ -24,17 +24,17 @@ jobs:
             10.0.x
 
       - name: Restore
-        run: dotnet restore Repo.slnx
+        run: dotnet restore PennyForYourStocks.slnx
 
       - name: Verify formatting
-        run: dotnet format Repo.slnx --no-restore --verify-no-changes --verbosity minimal
+        run: dotnet format PennyForYourStocks.slnx --no-restore --verify-no-changes --verbosity minimal
 
       - name: Clean, restore, build, and test
         run: |
-          dotnet clean Repo.slnx
-          dotnet restore Repo.slnx
-          dotnet build Repo.slnx --no-restore --configuration Release -warnaserror
-          dotnet test Repo.slnx --no-build --configuration Release
+          dotnet clean PennyForYourStocks.slnx
+          dotnet restore PennyForYourStocks.slnx
+          dotnet build PennyForYourStocks.slnx --no-restore --configuration Release -warnaserror
+          dotnet test PennyForYourStocks.slnx --no-build --configuration Release
 
       - name: Determine if prerelease
         id: prerelease_check

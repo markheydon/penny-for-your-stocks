@@ -13,7 +13,7 @@ updates:
       - markheydon
     labels:
       - type/chore
-      - status/in-review
+      - status/todo
       - priority/medium
     groups:
       tests:
@@ -72,7 +72,7 @@ updates:
       - markheydon
     labels:
       - type/chore
-      - status/in-review
+      - status/todo
       - priority/medium
     groups:
       github-actions:
