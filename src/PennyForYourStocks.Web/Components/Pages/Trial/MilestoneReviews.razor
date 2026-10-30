@@ -1,0 +1,92 @@
+@page "/trial/milestones"
+@attribute [Microsoft.AspNetCore.Authorization.Authorize]
+@using PennyForYourStocks.Application.Policies
+@inject MilestoneReviewService MilestoneService
+
+<PageTitle>Milestone reviews</PageTitle>
+<h1 class="mb-4 text-2xl font-semibold">Stop rule milestones</h1>
+<TrialGuardrailsBanner />
+<p class="guardrail mb-4">@TrialGuardrails.ProfitableStretchReminder</p>
+
+@if (schedule is not null)
+{
+    <ul class="mb-4 text-sm">
+        <li>Short-term (~3 months): @schedule.ShortTermDue</li>
+        <li>12-month stop/continue: @schedule.TwelveMonthDue</li>
+        <li>18-month follow-up: @schedule.EighteenMonthDue</li>
+    </ul>
+}
+
+<EditForm Model="review" OnValidSubmit="SaveReviewAsync" FormName="milestone-review" class="trial-card space-y-3">
+    <InputSelect @bind-Value="review.ReviewType" class="trial-input">
+        @foreach (var type in Enum.GetValues<Domain.ReviewType>())
+        {
+            <option value="@type">@type</option>
+        }
+    </InputSelect>
+    <InputDate @bind-Value="decisionDateModel" class="trial-input" />
+    <InputTextArea @bind-Value="review.JudgementText" class="trial-input" rows="4" placeholder="Plain-language judgement" />
+    <InputSelect @bind-Value="review.HopeStatus" class="trial-input">
+        <option value="">Hope status (optional)</option>
+        @foreach (var status in Enum.GetValues<Domain.HopeStatus>())
+        {
+            <option value="@status">@status</option>
+        }
+    </InputSelect>
+    <label class="inline-flex items-center gap-2 text-sm">
+        <InputCheckbox @bind-Value="review.FurtherCapitalInScope" />
+        Further capital in scope (short-term)
+    </label>
+    @if (message is not null)
+    {
+        <p class="text-sm">@message</p>
+    }
+    <button type="submit" class="trial-btn">Save review</button>
+</EditForm>
+
+@code {
+    private Application.Models.MilestoneScheduleDto? schedule;
+    private ReviewForm review = new() { ReviewType = Domain.ReviewType.ShortTerm3Month };
+    private DateTime decisionDateModel = DateTime.Today;
+    private string? message;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            schedule = await MilestoneService.GetScheduleAsync();
+        }
+        catch (Application.TrialValidationException ex)
+        {
+            message = ex.Message;
+        }
+    }
+
+    private async Task SaveReviewAsync()
+    {
+        try
+        {
+            await MilestoneService.UpsertReviewAsync(new Application.Models.MilestoneReviewUpsertRequest(
+                review.ReviewType,
+                DateOnly.FromDateTime(decisionDateModel),
+                review.JudgementText,
+                review.HopeStatus,
+                review.FurtherCapitalInScope,
+                null));
+            message = "Review saved.";
+            schedule = await MilestoneService.GetScheduleAsync();
+        }
+        catch (Application.TrialValidationException ex)
+        {
+            message = ex.Message;
+        }
+    }
+
+    private sealed class ReviewForm
+    {
+        public Domain.ReviewType ReviewType { get; set; }
+        public string JudgementText { get; set; } = string.Empty;
+        public Domain.HopeStatus? HopeStatus { get; set; }
+        public bool FurtherCapitalInScope { get; set; }
+    }
+}

@@ -4,11 +4,42 @@ A personal application to run a **written trial with a stop rule** for modest ac
 
 Built primarily because apparently simply asking shares to go up isn't a viable investment strategy.
 
-The project is at an early stage. This repository currently contains the .NET solution and test scaffolding; the trial log application is not yet usable. It is experimental, makes no promise of returns, and treats withdrawing about £100–£200 a month as a hope that may never be met.
+The project delivers an Aspire-orchestrated Blazor web app with Identity passkeys, a clean architecture trial log, and SQLite persistence. It is experimental, makes no promise of returns, and treats withdrawing about £100–£200 a month as a hope that may never be met.
 
-## Development
+## Run with Aspire AppHost
+
+From the repository root:
 
 ```bash
+dotnet run --project src/PennyForYourStocks.AppHost/PennyForYourStocks.AppHost.csproj
+```
+
+The AppHost publishes a `triallog` connection string to the web project and exposes HTTP health at `/health`.
+
+To run the web project alone (local development):
+
+```bash
+dotnet run --project src/PennyForYourStocks.Web/PennyForYourStocks.Web.csproj
+```
+
+Uses `ConnectionStrings:triallog` from `appsettings.json` (`Data Source=triallog.db`).
+
+## Tailwind CSS
+
+Styles are built into `src/PennyForYourStocks.Web/wwwroot/css/app.css`.
+
+```bash
+cd src/PennyForYourStocks.Web
+npm ci
+npm run build:css
+```
+
+Source input: `Styles/app.css`. Re-run `npm run build:css` after changing Razor markup classes or Tailwind config.
+
+## Development checks
+
+```bash
+dotnet format PennyForYourStocks.slnx --verify-no-changes
 dotnet build PennyForYourStocks.slnx -c Release -warnaserror
 dotnet test PennyForYourStocks.slnx -c Release --no-build
 ```
@@ -17,13 +48,15 @@ dotnet test PennyForYourStocks.slnx -c Release --no-build
 
 | Path | Purpose |
 |------|---------|
-| `PennyForYourStocks.slnx` | .NET solution (application and tests) |
-| `src/PennyForYourStocks/` | Application code |
-| `tests/PennyForYourStocks.Tests/` | Automated tests |
+| `PennyForYourStocks.slnx` | .NET solution (AppHost, web, domain, application, infrastructure, tests) |
+| `src/PennyForYourStocks.AppHost/` | Aspire orchestration |
+| `src/PennyForYourStocks.Web/` | Blazor UI, Identity passkeys, minimal API |
+| `src/PennyForYourStocks.Domain/` | Trial rules and calculators |
+| `src/PennyForYourStocks.Application/` | Use cases and export |
+| `src/PennyForYourStocks.Infrastructure/` | EF Core `TrialDbContext`, Identity, migrations |
+| `tests/PennyForYourStocks.*.Tests/` | Unit and integration tests |
+| `specs/001-written-trial-log/` | Feature specification and tasks |
 | `GOALS.md`, `SCOPE.md`, `CONVENTIONS.md` | Product and coding context |
-| `AGENTS.md`, `.cursor/rules/` | AI agent operating rules |
-| `.agents/skills/` | Project-specific agent workflows |
-| `plan/` | Release and PR policy |
 | `adr/` | Architectural decision records |
 
 ## Licence

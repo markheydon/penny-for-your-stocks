@@ -1,0 +1,44 @@
+@page "/trial/milestone-12"
+@attribute [Microsoft.AspNetCore.Authorization.Authorize]
+@using PennyForYourStocks.Application.Policies
+@inject TrialSummaryService SummaryService
+
+<PageTitle>12-month summary</PageTitle>
+<h1 class="mb-4 text-2xl font-semibold">12-month stop-or-continue summary</h1>
+<TrialGuardrailsBanner />
+<p class="guardrail mb-4">@TrialGuardrails.ProfitableStretchReminder</p>
+
+@if (error is not null)
+{
+    <p class="guardrail">@error</p>
+}
+else if (summary is not null)
+{
+    <div class="trial-card mb-4 space-y-2">
+        <h2 class="font-medium">Judgement</h2>
+        <p>@(summary.TwelveMonthJudgementText ?? "No 12-month review recorded yet.")</p>
+        <p>Total observed withdrawals: £@summary.WithdrawalsTotal.ToString("0.00")</p>
+    </div>
+    <div class="trial-card mb-4">
+        <h2 class="font-medium">Derived pot</h2>
+        <p>£@summary.Pot.DerivedPot.ToString("0.00") — @summary.Pot.Disclaimer</p>
+    </div>
+    <HopeChart Summary="summary.Hope" />
+}
+
+@code {
+    private Application.Models.Milestone12SummaryDto? summary;
+    private string? error;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            summary = await SummaryService.GetMilestone12SummaryAsync();
+        }
+        catch (Application.TrialPolicyException ex)
+        {
+            error = ex.Message;
+        }
+    }
+}

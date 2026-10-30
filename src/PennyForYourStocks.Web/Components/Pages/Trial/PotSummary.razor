@@ -1,0 +1,49 @@
+@page "/trial/pot"
+@attribute [Microsoft.AspNetCore.Authorization.Authorize]
+@inject TrialSummaryService SummaryService
+@inject TrialConfigurationService ConfigurationService
+
+<PageTitle>Pot summary</PageTitle>
+<h1 class="mb-4 text-2xl font-semibold">Trial pot (cash and costs)</h1>
+<TrialGuardrailsBanner />
+
+@if (nonTrialNote is not null)
+{
+    <p class="trial-card mb-4 text-sm"><strong>Non-trial holdings (not in pot figures):</strong> @nonTrialNote</p>
+}
+
+@if (error is not null)
+{
+    <p class="guardrail">@error</p>
+}
+else if (pot is not null)
+{
+    <div class="trial-card space-y-2">
+        <p>Opening: £@pot.OpeningAmount.ToString("0.00")</p>
+        <p>Top-ups: £@pot.TopUpsTotal.ToString("0.00")</p>
+        <p>Recorded costs: £@pot.CostsTotal.ToString("0.00")</p>
+        <p>Withdrawals: £@pot.WithdrawalsTotal.ToString("0.00")</p>
+        <p class="text-lg font-semibold">Derived pot: £@pot.DerivedPot.ToString("0.00")</p>
+        <p class="text-sm text-slate-600">@pot.Disclaimer</p>
+    </div>
+}
+
+@code {
+    private Application.Models.PotSummaryDto? pot;
+    private string? nonTrialNote;
+    private string? error;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var config = await ConfigurationService.GetAsync();
+        nonTrialNote = config?.NonTrialHoldingsNote;
+        try
+        {
+            pot = await SummaryService.GetPotSummaryAsync();
+        }
+        catch (Application.TrialPolicyException ex)
+        {
+            error = ex.Message;
+        }
+    }
+}

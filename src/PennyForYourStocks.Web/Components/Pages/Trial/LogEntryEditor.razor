@@ -1,0 +1,208 @@
+@page "/trial/log"
+@page "/trial/log/{CheckDate}"
+@attribute [Microsoft.AspNetCore.Authorization.Authorize]
+@using PennyForYourStocks.Application.Models
+@using PennyForYourStocks.Application.Services
+@inject LogEntryService LogEntryService
+@inject TrialConfigurationService ConfigurationService
+@inject NavigationManager Navigation
+
+<PageTitle>Weekly log entry</PageTitle>
+<h1 class="mb-4 text-2xl font-semibold">Weekly trial check</h1>
+<TrialGuardrailsBanner />
+
+@if (loadError is not null)
+{
+    <p class="guardrail">@loadError</p>
+}
+else
+{
+    <EditForm Model="model" OnValidSubmit="SaveAsync" FormName="log-entry" class="trial-card space-y-4">
+        <div>
+            <label class="block text-sm font-medium">Check date</label>
+            <InputDate @bind-Value="checkDateModel" class="trial-input" />
+        </div>
+        <div>
+            <label class="block text-sm font-medium">Consideration</label>
+            <InputTextArea @bind-Value="model.Consideration" class="trial-input" rows="4" />
+        </div>
+        <div>
+            <label class="block text-sm font-medium">Compliance notes</label>
+            <InputTextArea @bind-Value="model.ComplianceNotes" class="trial-input" rows="2" />
+        </div>
+        <div class="grid gap-3 md:grid-cols-3">
+            <div>
+                <label class="block text-sm">Aggregated spread/dealing</label>
+                <InputNumber @bind-Value="model.AggregatedSpreadDealingCosts" class="trial-input" />
+            </div>
+            <div>
+                <label class="block text-sm">Stamp duty</label>
+                <InputNumber @bind-Value="model.StampDuty" class="trial-input" />
+            </div>
+            <div>
+                <label class="block text-sm">FX fees</label>
+                <InputNumber @bind-Value="model.ForeignExchangeFees" class="trial-input" />
+            </div>
+        </div>
+        <div>
+            <label class="block text-sm">Withdrawal attributed (if not using cash observations)</label>
+            <InputNumber @bind-Value="model.WithdrawalAttributed" class="trial-input" />
+        </div>
+        <div class="space-y-2">
+            <h2 class="font-medium">Holdings</h2>
+            @foreach (var holding in holdings)
+            {
+                <div class="grid gap-2 md:grid-cols-3">
+                    <InputText @bind-Value="holding.IdentifierOrName" placeholder="Identifier or name" class="trial-input" />
+                    <InputNumber @bind-Value="holding.SpreadAndDealingCosts" placeholder="Line costs" class="trial-input" />
+                    <InputText @bind-Value="holding.Notes" placeholder="Notes" class="trial-input" />
+                </div>
+            }
+            <button type="button" class="trial-btn" @onclick="AddHolding">Add holding line</button>
+        </div>
+        <div>
+            <label class="inline-flex items-center gap-2 text-sm">
+                <InputCheckbox @bind-Value="model.PracticeModeAcknowledged" />
+                I acknowledge practice-mode limitations for summary figures
+            </label>
+        </div>
+        <div>
+            <label class="block text-sm">Practice mode disclaimer (optional)</label>
+            <InputTextArea @bind-Value="model.PracticeModeDisclaimer" class="trial-input" rows="2" />
+        </div>
+        @if (practiceWarning is not null)
+        {
+            <p class="guardrail">@practiceWarning</p>
+        }
+        @if (statusMessage is not null)
+        {
+            <p class="text-sm text-green-800">@statusMessage</p>
+        }
+        <button type="submit" class="trial-btn">Save entry</button>
+    </EditForm>
+}
+
+@code {
+    [Parameter] public string? CheckDate { get; set; }
+
+    private LogEntryEditorModel model = new();
+    private List<HoldingModel> holdings = [new()];
+    private DateTime checkDateModel = DateTime.Today;
+    private string? loadError;
+    private string? statusMessage;
+    private string? practiceWarning;
+    private byte[]? rowVersion;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        await ConfigurationService.EnsureMinimalOnboardingAsync(null);
+        if (DateOnly.TryParse(CheckDate, out var parsed))
+        {
+            checkDateModel = parsed.ToDateTime(TimeOnly.MinValue);
+            await LoadExistingAsync(parsed);
+        }
+        else
+        {
+            var today = DateOnly.FromDateTime(DateTime.Today);
+            var existing = await LogEntryService.GetAsync(today);
+            if (existing is not null)
+            {
+                Navigation.NavigateTo($"/trial/log/{today:yyyy-MM-dd}", replace: true);
+            }
+        }
+    }
+
+    private async Task LoadExistingAsync(DateOnly date)
+    {
+        var entry = await LogEntryService.GetAsync(date);
+        if (entry is null)
+        {
+            model = new LogEntryEditorModel { Consideration = string.Empty };
+            holdings = [new HoldingModel()];
+            rowVersion = null;
+            return;
+        }
+
+        model = new LogEntryEditorModel
+        {
+            Consideration = entry.Consideration,
+            ComplianceNotes = entry.ComplianceNotes,
+            PracticeModeAcknowledged = entry.PracticeModeAcknowledged,
+            PracticeModeDisclaimer = entry.PracticeModeDisclaimer,
+            AggregatedSpreadDealingCosts = entry.AggregatedSpreadDealingCosts,
+            StampDuty = entry.StampDuty,
+            ForeignExchangeFees = entry.ForeignExchangeFees,
+            WithdrawalAttributed = entry.WithdrawalAttributed,
+        };
+        holdings = entry.Holdings.Select(h => new HoldingModel
+        {
+            IdentifierOrName = h.IdentifierOrName,
+            SpreadAndDealingCosts = h.SpreadAndDealingCosts,
+            Notes = h.Notes,
+        }).ToList();
+        if (holdings.Count == 0)
+        {
+            holdings.Add(new HoldingModel());
+        }
+
+        rowVersion = entry.RowVersion;
+        practiceWarning = entry.PracticeModeWarning ? "Practice-mode warning applies to this entry." : null;
+    }
+
+    private void AddHolding() => holdings.Add(new HoldingModel());
+
+    private async Task SaveAsync()
+    {
+        var date = DateOnly.FromDateTime(checkDateModel);
+        var request = new LogEntryUpsertRequest(
+            model.Consideration,
+            model.ComplianceNotes,
+            model.PracticeModeAcknowledged,
+            model.PracticeModeDisclaimer,
+            model.AggregatedSpreadDealingCosts,
+            model.StampDuty,
+            model.ForeignExchangeFees,
+            model.WithdrawalAttributed,
+            holdings.Where(h => !string.IsNullOrWhiteSpace(h.IdentifierOrName))
+                .Select(h => new LogEntryHoldingDto(h.IdentifierOrName, h.SpreadAndDealingCosts, h.Notes)).ToList(),
+            rowVersion);
+
+        var warning = LogEntryService.GetPracticeModeWarning(request);
+        practiceWarning = warning.ShouldWarn ? warning.Message : null;
+
+        try
+        {
+            var saved = await LogEntryService.UpsertForCheckDateAsync(date, request);
+            rowVersion = saved.RowVersion;
+            statusMessage = "Entry saved.";
+            Navigation.NavigateTo($"/trial/log/{date:yyyy-MM-dd}", replace: true);
+        }
+        catch (Application.TrialValidationException ex)
+        {
+            loadError = ex.Message;
+        }
+        catch (Application.TrialConcurrencyException)
+        {
+            loadError = "This entry was changed on another device. Reload the page before saving again.";
+        }
+    }
+
+    private sealed class LogEntryEditorModel
+    {
+        public string Consideration { get; set; } = string.Empty;
+        public string? ComplianceNotes { get; set; }
+        public bool PracticeModeAcknowledged { get; set; }
+        public string? PracticeModeDisclaimer { get; set; }
+        public decimal? AggregatedSpreadDealingCosts { get; set; }
+        public decimal? StampDuty { get; set; }
+        public decimal? ForeignExchangeFees { get; set; }
+        public decimal? WithdrawalAttributed { get; set; }
+    }
+
+    private sealed class HoldingModel
+    {
+        public string IdentifierOrName { get; set; } = string.Empty;
+        public decimal? SpreadAndDealingCosts { get; set; }
+        public string? Notes { get; set; }
+    }
+}

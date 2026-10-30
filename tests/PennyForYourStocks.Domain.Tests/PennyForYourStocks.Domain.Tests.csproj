@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net8.0;net10.0</TargetFrameworks>
+    <TargetFramework>net10.0</TargetFramework>
     <IsPackable>false</IsPackable>
     <IsTestProject>true</IsTestProject>
     <OutputType>Exe</OutputType>
@@ -21,7 +21,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\PennyForYourStocks\PennyForYourStocks.csproj" />
+    <ProjectReference Include="..\..\src\PennyForYourStocks.Domain\PennyForYourStocks.Domain.csproj" />
   </ItemGroup>
 
 </Project>

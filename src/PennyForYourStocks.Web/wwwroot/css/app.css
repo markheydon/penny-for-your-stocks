@@ -1,0 +1,9 @@
+/* Built by npm run build:css — see README */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+body { background: #f8fafc; color: #0f172a; }
+.trial-card { border-radius: 0.5rem; border: 1px solid #e2e8f0; background: #fff; padding: 1rem; }
+.trial-btn { display: inline-flex; border-radius: 0.375rem; background: #1e293b; color: #fff; padding: 0.5rem 0.75rem; font-size: 0.875rem; text-decoration: none; }
+.trial-input { width: 100%; border-radius: 0.375rem; border: 1px solid #cbd5e1; padding: 0.5rem 0.75rem; }
+.guardrail { border-radius: 0.375rem; border: 1px solid #fde68a; background: #fffbeb; padding: 0.75rem; font-size: 0.875rem; }

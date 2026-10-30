@@ -1,0 +1,32 @@
+@page "/trial/history"
+@attribute [Microsoft.AspNetCore.Authorization.Authorize]
+@inject LogEntryService LogEntryService
+
+<PageTitle>Log history</PageTitle>
+<h1 class="mb-4 text-2xl font-semibold">Chronological log</h1>
+<TrialGuardrailsBanner />
+
+<ul class="space-y-3">
+@foreach (var entry in entries)
+{
+    <li class="trial-card">
+        <div class="flex flex-wrap items-center justify-between gap-2">
+            <strong>@entry.CheckDate.ToString("yyyy-MM-dd")</strong>
+            <a class="trial-btn" href="@($"/trial/log/{entry.CheckDate:yyyy-MM-dd}")">Open</a>
+        </div>
+        <p class="mt-2 text-sm">@entry.Consideration</p>
+        <p class="text-xs text-slate-600">Total costs: £@entry.TotalCosts.ToString("0.00")</p>
+        @if (entry.PracticeModeWarning)
+        {
+            <p class="guardrail mt-2">Practice-mode warning</p>
+        }
+    </li>
+}
+</ul>
+
+@code {
+    private IReadOnlyList<Application.Models.LogEntrySummaryDto> entries = [];
+
+    protected override async Task OnInitializedAsync() =>
+        entries = await LogEntryService.ListAsync(null, null);
+}
