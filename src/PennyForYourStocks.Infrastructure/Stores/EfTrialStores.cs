@@ -80,7 +80,7 @@ internal sealed class EfTrialWriteStore(TrialDbContext db) : ITrialWriteStore
         }
         else
         {
-            if (entry.RowVersion.Length > 0)
+            if (entry.RowVersion is { Length: > 0 })
             {
                 db.Entry(tracked).Property(e => e.RowVersion).OriginalValue = entry.RowVersion;
             }
@@ -127,7 +127,7 @@ internal sealed class EfTrialWriteStore(TrialDbContext db) : ITrialWriteStore
         }
         else
         {
-            if (review.RowVersion.Length > 0)
+            if (review.RowVersion is { Length: > 0 })
             {
                 db.Entry(tracked).Property(r => r.RowVersion).OriginalValue = review.RowVersion;
             }

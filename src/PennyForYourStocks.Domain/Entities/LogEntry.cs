@@ -24,7 +24,7 @@ public class LogEntry
 
     public decimal? WithdrawalAttributed { get; set; }
 
-    public byte[] RowVersion { get; set; } = [];
+    public byte[] RowVersion { get; set; } = null!;
 
     public ICollection<LogEntryHolding> Holdings { get; set; } = [];
 }

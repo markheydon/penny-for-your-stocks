@@ -48,8 +48,9 @@ public class TrialDbContext : IdentityDbContext<ApplicationUser>
             entity.Property(e => e.StampDuty).HasColumnType("decimal(18,2)");
             entity.Property(e => e.ForeignExchangeFees).HasColumnType("decimal(18,2)");
             entity.Property(e => e.WithdrawalAttributed).HasColumnType("decimal(18,2)");
-            entity.Property(e => e.RowVersion).IsRowVersion();
-            entity.HasIndex(e => new { e.UserId, e.CheckDate }).IsUnique();
+            entity.Property(e => e.RowVersion)
+                .IsConcurrencyToken()
+                .IsRequired();
             entity.HasMany(e => e.Holdings).WithOne(h => h.LogEntry).HasForeignKey(h => h.LogEntryId).OnDelete(DeleteBehavior.Cascade);
             entity.HasQueryFilter(e => _userId == null || e.UserId == _userId);
         });
@@ -74,9 +75,50 @@ public class TrialDbContext : IdentityDbContext<ApplicationUser>
 
         builder.Entity<MilestoneReview>(entity =>
         {
-            entity.Property(e => e.RowVersion).IsRowVersion();
+            entity.Property(e => e.RowVersion)
+                .IsConcurrencyToken()
+                .IsRequired();
             entity.HasIndex(e => new { e.UserId, e.ReviewType }).IsUnique();
             entity.HasQueryFilter(e => _userId == null || e.UserId == _userId);
         });
     }
+
+    public override int SaveChanges(bool acceptAllChangesOnSuccess)
+    {
+        ApplySqliteRowVersions();
+        return base.SaveChanges(acceptAllChangesOnSuccess);
+    }
+
+    public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+    {
+        ApplySqliteRowVersions();
+        return base.SaveChangesAsync(cancellationToken);
+    }
+
+    public override Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = default)
+    {
+        ApplySqliteRowVersions();
+        return base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
+    }
+
+    private void ApplySqliteRowVersions()
+    {
+        foreach (var entry in ChangeTracker.Entries<LogEntry>())
+        {
+            if (entry.State is EntityState.Added or EntityState.Modified)
+            {
+                entry.Property(e => e.RowVersion).CurrentValue = CreateRowVersionToken();
+            }
+        }
+
+        foreach (var entry in ChangeTracker.Entries<MilestoneReview>())
+        {
+            if (entry.State is EntityState.Added or EntityState.Modified)
+            {
+                entry.Property(r => r.RowVersion).CurrentValue = CreateRowVersionToken();
+            }
+        }
+    }
+
+    private static byte[] CreateRowVersionToken() => Guid.NewGuid().ToByteArray();
 }

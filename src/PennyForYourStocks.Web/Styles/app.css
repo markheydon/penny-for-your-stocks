@@ -18,6 +18,18 @@ body {
     @apply w-full rounded-md border border-slate-300 px-3 py-2 text-sm;
 }
 
+.form-label {
+    @apply block text-sm font-medium text-slate-700;
+}
+
+.form-label-inline {
+    @apply inline-flex items-center gap-2 text-sm font-medium text-slate-700;
+}
+
+.form-legend {
+    @apply text-sm font-medium text-slate-700;
+}
+
 .guardrail {
     @apply rounded-md border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900;
 }

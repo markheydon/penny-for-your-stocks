@@ -25,16 +25,16 @@
                 <ValidationSummary class="text-red-600 text-sm" role="alert" />
                 <div class="mb-4 space-y-1">
                     <InputText @bind-Value="Input.Email" id="Input.Email" class="trial-input" autocomplete="username webauthn" aria-required="true" placeholder="name@example.com" />
-                    <label for="Input.Email" class="block text-sm font-medium text-slate-700">Email</label>
+                    <label for="Input.Email" class="form-label">Email</label>
                     <ValidationMessage For="() => Input.Email" class="text-red-600 text-sm" />
                 </div>
                 <div class="mb-4 space-y-1">
                     <InputText type="password" @bind-Value="Input.Password" id="Input.Password" class="trial-input" autocomplete="current-password" aria-required="true" placeholder="password" />
-                    <label for="Input.Password" class="block text-sm font-medium text-slate-700">Password</label>
+                    <label for="Input.Password" class="form-label">Password</label>
                     <ValidationMessage For="() => Input.Password" class="text-red-600 text-sm" />
                 </div>
                 <div class="mb-4 flex items-center gap-2 text-sm">
-                    <label class="block text-sm font-medium text-slate-700">
+                    <label class="form-label-inline">
                         <InputCheckbox @bind-Value="Input.RememberMe" class="h-4 w-4 rounded border-slate-300" />
                         Remember me
                     </label>

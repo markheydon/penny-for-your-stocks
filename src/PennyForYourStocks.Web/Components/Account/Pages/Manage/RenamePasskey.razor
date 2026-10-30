@@ -21,7 +21,7 @@
     <hr class="my-4 border-slate-200" />
     <ValidationSummary class="text-red-600 text-sm" role="alert" />
     <div class="mb-4">
-        <label for="Input.Name" class="block text-sm font-medium text-slate-700">Passkey name</label>
+        <label for="Input.Name" class="form-label">Passkey name</label>
         <InputText @bind-Value="Input.Name" id="Input.Name" class="trial-input mt-1" aria-required="true" placeholder="My passkey" />
         <ValidationMessage For="() => Input.Name" class="mt-1 text-sm text-red-600" />
     </div>

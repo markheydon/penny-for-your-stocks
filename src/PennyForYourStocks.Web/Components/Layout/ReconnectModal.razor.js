@@ -1,22 +1,14 @@
-// Set up event handlers (dialog must exist before this module runs — see App.razor script order).
+// Set up event handlers
 const reconnectModal = document.getElementById("components-reconnect-modal");
-if (!reconnectModal) {
-    console.error("Blazor reconnect modal element was not found; circuit reconnect UI will not appear.");
-} else {
-    reconnectModal.addEventListener("components-reconnect-state-changed", handleReconnectStateChanged);
+reconnectModal.addEventListener("components-reconnect-state-changed", handleReconnectStateChanged);
 
-    const retryButton = document.getElementById("components-reconnect-button");
-    retryButton?.addEventListener("click", retry);
+const retryButton = document.getElementById("components-reconnect-button");
+retryButton.addEventListener("click", retry);
 
-    const resumeButton = document.getElementById("components-resume-button");
-    resumeButton?.addEventListener("click", resume);
-}
+const resumeButton = document.getElementById("components-resume-button");
+resumeButton.addEventListener("click", resume);
 
 function handleReconnectStateChanged(event) {
-    if (!reconnectModal) {
-        return;
-    }
-
     if (event.detail.state === "show") {
         reconnectModal.showModal();
     } else if (event.detail.state === "hide") {
@@ -32,23 +24,16 @@ async function retry() {
     document.removeEventListener("visibilitychange", retryWhenDocumentBecomesVisible);
 
     try {
-        // Reconnect will asynchronously return:
-        // - true to mean success
-        // - false to mean we reached the server, but it rejected the connection (e.g., unknown circuit ID)
-        // - exception to mean we didn't reach the server (this can be sync or async)
         const successful = await Blazor.reconnect();
         if (!successful) {
-            // We have been able to reach the server, but the circuit is no longer available.
-            // We'll reload the page so the user can continue using the app as quickly as possible.
             const resumeSuccessful = await Blazor.resumeCircuit();
             if (!resumeSuccessful) {
                 location.reload();
             } else {
-                reconnectModal?.close();
+                reconnectModal.close();
             }
         }
     } catch {
-        // We got an exception, server is currently unavailable
         document.addEventListener("visibilitychange", retryWhenDocumentBecomesVisible);
     }
 }
@@ -60,7 +45,7 @@ async function resume() {
             location.reload();
         }
     } catch {
-        reconnectModal?.classList.replace("components-reconnect-paused", "components-reconnect-resume-failed");
+        reconnectModal.classList.replace("components-reconnect-paused", "components-reconnect-resume-failed");
     }
 }
 

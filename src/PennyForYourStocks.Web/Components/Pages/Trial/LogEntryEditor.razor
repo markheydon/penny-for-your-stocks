@@ -1,8 +1,12 @@
 @page "/trial/log"
 @page "/trial/log/{CheckDate}"
+@rendermode InteractiveServer
 @attribute [Microsoft.AspNetCore.Authorization.Authorize]
+@using System.ComponentModel.DataAnnotations
+@using PennyForYourStocks.Application
 @using PennyForYourStocks.Application.Models
 @using PennyForYourStocks.Application.Services
+@using Microsoft.EntityFrameworkCore
 @inject LogEntryService LogEntryService
 @inject TrialConfigurationService ConfigurationService
 @inject NavigationManager Navigation
@@ -11,76 +15,109 @@
 <h1 class="mb-4 text-2xl font-semibold">Weekly trial check</h1>
 <TrialGuardrailsBanner />
 
-@if (loadError is not null)
-{
-    <p class="guardrail">@loadError</p>
-}
-else
-{
-    <EditForm Model="model" OnValidSubmit="SaveAsync" FormName="log-entry" class="trial-card space-y-4">
+<EditForm Model="model" OnValidSubmit="SaveAsync" OnInvalidSubmit="OnInvalidSubmit" FormName="log-entry" class="trial-card space-y-4">
+    <DataAnnotationsValidator />
+    <ValidationSummary class="text-red-600 text-sm" role="alert" />
+
+    @if (formError is not null)
+    {
+        <p class="guardrail" role="alert">@formError</p>
+    }
+
+    <div>
+        <label class="form-label" for="log-check-date">Check date</label>
+        <InputDate @bind-Value="checkDateModel" class="trial-input" id="log-check-date" />
+    </div>
+    <div>
+        <label class="form-label" for="log-consideration">Consideration <span class="text-red-600" aria-hidden="true">*</span></label>
+        <InputTextArea @bind-Value="model.Consideration" class="trial-input" rows="4" id="log-consideration" />
+        <ValidationMessage For="() => model.Consideration" class="mt-1 text-sm text-red-600" />
+    </div>
+    <div>
+        <label class="form-label" for="log-compliance">Compliance notes</label>
+        <InputTextArea @bind-Value="model.ComplianceNotes" class="trial-input" rows="2" id="log-compliance" />
+    </div>
+    <div class="grid gap-3 md:grid-cols-3">
         <div>
-            <label class="block text-sm font-medium">Check date</label>
-            <InputDate @bind-Value="checkDateModel" class="trial-input" />
-        </div>
-        <div>
-            <label class="block text-sm font-medium">Consideration</label>
-            <InputTextArea @bind-Value="model.Consideration" class="trial-input" rows="4" />
-        </div>
-        <div>
-            <label class="block text-sm font-medium">Compliance notes</label>
-            <InputTextArea @bind-Value="model.ComplianceNotes" class="trial-input" rows="2" />
-        </div>
-        <div class="grid gap-3 md:grid-cols-3">
-            <div>
-                <label class="block text-sm">Aggregated spread/dealing</label>
-                <InputNumber @bind-Value="model.AggregatedSpreadDealingCosts" class="trial-input" />
-            </div>
-            <div>
-                <label class="block text-sm">Stamp duty</label>
-                <InputNumber @bind-Value="model.StampDuty" class="trial-input" />
-            </div>
-            <div>
-                <label class="block text-sm">FX fees</label>
-                <InputNumber @bind-Value="model.ForeignExchangeFees" class="trial-input" />
-            </div>
+            <label class="form-label" for="log-aggregated-costs">Aggregated spread/dealing</label>
+            <InputNumber @bind-Value="model.AggregatedSpreadDealingCosts" class="trial-input" id="log-aggregated-costs" />
+            <ValidationMessage For="() => model.AggregatedSpreadDealingCosts" class="mt-1 text-sm text-red-600" />
         </div>
         <div>
-            <label class="block text-sm">Withdrawal attributed (if not using cash observations)</label>
-            <InputNumber @bind-Value="model.WithdrawalAttributed" class="trial-input" />
+            <label class="form-label" for="log-stamp-duty">Stamp duty</label>
+            <InputNumber @bind-Value="model.StampDuty" class="trial-input" id="log-stamp-duty" />
         </div>
-        <div class="space-y-2">
-            <h2 class="font-medium">Holdings</h2>
-            @foreach (var holding in holdings)
-            {
+        <div>
+            <label class="form-label" for="log-fx-fees">FX fees</label>
+            <InputNumber @bind-Value="model.ForeignExchangeFees" class="trial-input" id="log-fx-fees" />
+        </div>
+    </div>
+    <p class="text-xs text-slate-600">Use either aggregated spread/dealing costs or per-holding line costs, not both.</p>
+    <div>
+        <label class="form-label" for="log-withdrawal">Withdrawal attributed (if not using cash observations)</label>
+        <InputNumber @bind-Value="model.WithdrawalAttributed" class="trial-input" id="log-withdrawal" />
+    </div>
+    <div class="space-y-3">
+        <h2 class="font-medium">Holdings</h2>
+        <p class="text-xs text-slate-600">Optional. Each line needs an identifier or name if you enter costs or notes.</p>
+        @if (holdingErrors.Count > 0)
+        {
+            <ul class="list-inside list-disc text-sm text-red-600" role="alert">
+                @foreach (var holdingError in holdingErrors)
+                {
+                    <li>@holdingError</li>
+                }
+            </ul>
+        }
+        @if (holdingHint is not null)
+        {
+            <p class="guardrail text-sm" role="status">@holdingHint</p>
+        }
+        @for (var i = 0; i < holdings.Count; i++)
+        {
+            var index = i;
+            <fieldset class="rounded border border-slate-200 p-3">
+                <legend class="form-legend px-1">Holding @(index + 1)</legend>
                 <div class="grid gap-2 md:grid-cols-3">
-                    <InputText @bind-Value="holding.IdentifierOrName" placeholder="Identifier or name" class="trial-input" />
-                    <InputNumber @bind-Value="holding.SpreadAndDealingCosts" placeholder="Line costs" class="trial-input" />
-                    <InputText @bind-Value="holding.Notes" placeholder="Notes" class="trial-input" />
+                    <div>
+                        <label class="sr-only" for="@($"holding-id-{index}")">Identifier or name</label>
+                        <InputText @bind-Value="holdings[index].IdentifierOrName" placeholder="Identifier or name" class="trial-input" id="@($"holding-id-{index}")" />
+                    </div>
+                    <div>
+                        <label class="sr-only" for="@($"holding-costs-{index}")">Line costs</label>
+                        <InputNumber @bind-Value="holdings[index].SpreadAndDealingCosts" placeholder="Line costs" class="trial-input" id="@($"holding-costs-{index}")" />
+                    </div>
+                    <div class="flex gap-2">
+                        <div class="min-w-0 flex-1">
+                            <label class="sr-only" for="@($"holding-notes-{index}")">Notes</label>
+                            <InputText @bind-Value="holdings[index].Notes" placeholder="Notes" class="trial-input" id="@($"holding-notes-{index}")" />
+                        </div>
+                        @if (holdings.Count > 1)
+                        {
+                            <button type="button" class="trial-btn shrink-0" @onclick="() => RemoveHolding(index)">Remove</button>
+                        }
+                    </div>
                 </div>
-            }
-            <button type="button" class="trial-btn" @onclick="AddHolding">Add holding line</button>
-        </div>
-        <div>
-            <label class="inline-flex items-center gap-2 text-sm">
-                <InputCheckbox @bind-Value="model.PracticeModeAcknowledged" />
-                I acknowledge practice-mode limitations for summary figures
-            </label>
-        </div>
-        <div>
-            <label class="block text-sm">Practice mode disclaimer (optional)</label>
-            <InputTextArea @bind-Value="model.PracticeModeDisclaimer" class="trial-input" rows="2" />
-        </div>
-        @if (practiceWarning is not null)
-        {
-            <p class="guardrail">@practiceWarning</p>
+            </fieldset>
         }
-        @if (statusMessage is not null)
-        {
-            <p class="text-sm text-green-800">@statusMessage</p>
-        }
-        <button type="submit" class="trial-btn">Save entry</button>
-    </EditForm>
-}
+        <button type="button" class="trial-btn" @onclick="AddHolding">Add holding line</button>
+    </div>
+    <div>
+        <label class="form-label-inline">
+            <InputCheckbox @bind-Value="model.PracticeModeAcknowledged" />
+            I acknowledge practice-mode limitations for summary figures
+        </label>
+    </div>
+    <div>
+        <label class="form-label" for="log-practice-disclaimer">Practice mode disclaimer (optional)</label>
+        <InputTextArea @bind-Value="model.PracticeModeDisclaimer" class="trial-input" rows="2" id="log-practice-disclaimer" />
+    </div>
+    @if (practiceWarning is not null)
+    {
+        <p class="guardrail">@practiceWarning</p>
+    }
+    <button type="submit" class="trial-btn">Save entry</button>
+</EditForm>
 
 @code {
     [Parameter] public string? CheckDate { get; set; }
@@ -88,9 +125,10 @@ else
     private LogEntryEditorModel model = new();
     private List<HoldingModel> holdings = [new()];
     private DateTime checkDateModel = DateTime.Today;
-    private string? loadError;
-    private string? statusMessage;
+    private string? formError;
     private string? practiceWarning;
+    private string? holdingHint;
+    private readonly List<string> holdingErrors = [];
     private byte[]? rowVersion;
 
     protected override async Task OnParametersSetAsync()
@@ -100,16 +138,30 @@ else
         {
             checkDateModel = parsed.ToDateTime(TimeOnly.MinValue);
             await LoadExistingAsync(parsed);
+            return;
         }
-        else
+
+        var today = DateOnly.FromDateTime(DateTime.Today);
+        var existingToday = await LogEntryService.GetAsync(today);
+        if (existingToday is not null)
         {
-            var today = DateOnly.FromDateTime(DateTime.Today);
-            var existing = await LogEntryService.GetAsync(today);
-            if (existing is not null)
-            {
-                Navigation.NavigateTo($"/trial/log/{today:yyyy-MM-dd}", replace: true);
-            }
+            Navigation.NavigateTo($"/trial/log/{today:yyyy-MM-dd}", replace: true);
+            return;
         }
+
+        ResetForNewEntry(today);
+    }
+
+    private void ResetForNewEntry(DateOnly checkDate)
+    {
+        checkDateModel = checkDate.ToDateTime(TimeOnly.MinValue);
+        model = new LogEntryEditorModel { Consideration = string.Empty };
+        holdings = [new HoldingModel()];
+        rowVersion = null;
+        formError = null;
+        practiceWarning = null;
+        holdingHint = null;
+        holdingErrors.Clear();
     }
 
     private async Task LoadExistingAsync(DateOnly date)
@@ -117,9 +169,7 @@ else
         var entry = await LogEntryService.GetAsync(date);
         if (entry is null)
         {
-            model = new LogEntryEditorModel { Consideration = string.Empty };
-            holdings = [new HoldingModel()];
-            rowVersion = null;
+            ResetForNewEntry(date);
             return;
         }
 
@@ -147,12 +197,61 @@ else
 
         rowVersion = entry.RowVersion;
         practiceWarning = entry.PracticeModeWarning ? "Practice-mode warning applies to this entry." : null;
+        formError = null;
+        holdingHint = null;
+        holdingErrors.Clear();
     }
 
-    private void AddHolding() => holdings.Add(new HoldingModel());
+    private void AddHolding()
+    {
+        holdingHint = null;
+        formError = null;
+
+        var last = holdings[^1];
+        if (string.IsNullOrWhiteSpace(last.IdentifierOrName))
+        {
+            holdingHint = "Enter an identifier or name on the current holding line before adding another.";
+            return;
+        }
+
+        holdings.Add(new HoldingModel());
+    }
+
+    private void RemoveHolding(int index)
+    {
+        holdings.RemoveAt(index);
+        holdingHint = null;
+        if (holdings.Count == 0)
+        {
+            holdings.Add(new HoldingModel());
+        }
+    }
+
+    private void OnInvalidSubmit()
+    {
+        formError = null;
+        holdingErrors.Clear();
+    }
 
     private async Task SaveAsync()
     {
+        formError = null;
+        holdingHint = null;
+        holdingErrors.Clear();
+        model.Consideration = model.Consideration.Trim();
+
+        if (!TryValidateHoldings(out var holdingValidationErrors))
+        {
+            holdingErrors.AddRange(holdingValidationErrors);
+            return;
+        }
+
+        if (!TryValidateCostPattern(out var costError))
+        {
+            formError = costError;
+            return;
+        }
+
         var date = DateOnly.FromDateTime(checkDateModel);
         var request = new LogEntryUpsertRequest(
             model.Consideration,
@@ -164,7 +263,7 @@ else
             model.ForeignExchangeFees,
             model.WithdrawalAttributed,
             holdings.Where(h => !string.IsNullOrWhiteSpace(h.IdentifierOrName))
-                .Select(h => new LogEntryHoldingDto(h.IdentifierOrName, h.SpreadAndDealingCosts, h.Notes)).ToList(),
+                .Select(h => new LogEntryHoldingDto(h.IdentifierOrName.Trim(), h.SpreadAndDealingCosts, h.Notes)).ToList(),
             rowVersion);
 
         var warning = LogEntryService.GetPracticeModeWarning(request);
@@ -172,37 +271,135 @@ else
 
         try
         {
-            var saved = await LogEntryService.UpsertForCheckDateAsync(date, request);
-            rowVersion = saved.RowVersion;
-            statusMessage = "Entry saved.";
-            Navigation.NavigateTo($"/trial/log/{date:yyyy-MM-dd}", replace: true);
+            await LogEntryService.UpsertForCheckDateAsync(date, request);
+            Navigation.NavigateTo(
+                Navigation.GetUriWithQueryParameters(
+                    "/trial/history",
+                    new Dictionary<string, object?> { ["saved"] = true }),
+                replace: true);
         }
-        catch (Application.TrialValidationException ex)
+        catch (TrialValidationException ex)
         {
-            loadError = ex.Message;
+            formError = ex.Message;
         }
-        catch (Application.TrialConcurrencyException)
+        catch (TrialConcurrencyException)
         {
-            loadError = "This entry was changed on another device. Reload the page before saving again.";
+            formError = "This entry was changed on another device. Reload the page before saving again.";
+        }
+        catch (DbUpdateException)
+        {
+            formError = "Could not save this entry. Try again, or contact support if the problem continues.";
         }
     }
 
-    private sealed class LogEntryEditorModel
+    private bool TryValidateHoldings(out IReadOnlyList<string> errors)
     {
+        var messages = new List<string>();
+
+        for (var i = 0; i < holdings.Count; i++)
+        {
+            var holding = holdings[i];
+            var line = i + 1;
+            var hasIdentifier = !string.IsNullOrWhiteSpace(holding.IdentifierOrName);
+            var hasCosts = holding.SpreadAndDealingCosts is not null and not 0m;
+            var hasNotes = !string.IsNullOrWhiteSpace(holding.Notes);
+            var rowIsEmpty = !hasIdentifier && !hasCosts && !hasNotes;
+
+            if (holdings.Count == 1 && rowIsEmpty)
+            {
+                continue;
+            }
+
+            if (rowIsEmpty)
+            {
+                messages.Add($"Holding line {line}: enter an identifier or name, or remove this empty line.");
+                continue;
+            }
+
+            if (!hasIdentifier)
+            {
+                messages.Add($"Holding line {line}: identifier or name is required.");
+            }
+
+            if (hasCosts && holding.SpreadAndDealingCosts is < 0m)
+            {
+                messages.Add($"Holding line {line}: line costs cannot be negative.");
+            }
+        }
+
+        errors = messages;
+        return messages.Count == 0;
+    }
+
+    private bool TryValidateCostPattern(out string? error)
+    {
+        var hasRollup = model.AggregatedSpreadDealingCosts is not null and not 0m;
+        var hasLineCosts = holdings.Any(h => h.SpreadAndDealingCosts is not null and not 0m);
+        if (hasRollup && hasLineCosts)
+        {
+            error = "Use either aggregated spread and dealing costs or per-holding line costs, not both.";
+            return false;
+        }
+
+        error = null;
+        return true;
+    }
+
+    private sealed class LogEntryEditorModel : IValidatableObject
+    {
+        [Required(ErrorMessage = "Consideration is required.")]
+        [MaxLength(TrialFieldLimits.Consideration, ErrorMessage = "Consideration is too long.")]
         public string Consideration { get; set; } = string.Empty;
+
         public string? ComplianceNotes { get; set; }
+
         public bool PracticeModeAcknowledged { get; set; }
+
         public string? PracticeModeDisclaimer { get; set; }
+
         public decimal? AggregatedSpreadDealingCosts { get; set; }
+
         public decimal? StampDuty { get; set; }
+
         public decimal? ForeignExchangeFees { get; set; }
+
         public decimal? WithdrawalAttributed { get; set; }
+
+        public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
+        {
+            if (string.IsNullOrWhiteSpace(Consideration))
+            {
+                yield return new ValidationResult("Consideration is required.", [nameof(Consideration)]);
+            }
+
+            if (AggregatedSpreadDealingCosts is < 0m)
+            {
+                yield return new ValidationResult("Aggregated spread/dealing costs cannot be negative.", [nameof(AggregatedSpreadDealingCosts)]);
+            }
+
+            if (StampDuty is < 0m)
+            {
+                yield return new ValidationResult("Stamp duty cannot be negative.", [nameof(StampDuty)]);
+            }
+
+            if (ForeignExchangeFees is < 0m)
+            {
+                yield return new ValidationResult("FX fees cannot be negative.", [nameof(ForeignExchangeFees)]);
+            }
+
+            if (WithdrawalAttributed is < 0m)
+            {
+                yield return new ValidationResult("Withdrawal attributed cannot be negative.", [nameof(WithdrawalAttributed)]);
+            }
+        }
     }
 
     private sealed class HoldingModel
     {
         public string IdentifierOrName { get; set; } = string.Empty;
+
         public decimal? SpreadAndDealingCosts { get; set; }
+
         public string? Notes { get; set; }
     }
 }

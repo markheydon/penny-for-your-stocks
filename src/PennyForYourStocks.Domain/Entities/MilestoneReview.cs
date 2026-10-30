@@ -16,5 +16,5 @@ public class MilestoneReview
 
     public bool? FurtherCapitalInScope { get; set; }
 
-    public byte[] RowVersion { get; set; } = [];
+    public byte[] RowVersion { get; set; } = null!;
 }

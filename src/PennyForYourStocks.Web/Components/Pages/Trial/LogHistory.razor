@@ -6,6 +6,11 @@
 <h1 class="mb-4 text-2xl font-semibold">Chronological log</h1>
 <TrialGuardrailsBanner />
 
+@if (ShowSavedMessage)
+{
+    <p class="mb-4 text-sm text-green-800" role="status">Entry saved.</p>
+}
+
 @if (entries.Count == 0)
 {
     <div class="trial-card space-y-3">
@@ -41,6 +46,9 @@ else
 }
 
 @code {
+    [SupplyParameterFromQuery(Name = "saved")]
+    public bool ShowSavedMessage { get; set; }
+
     private IReadOnlyList<Application.Models.LogEntrySummaryDto> entries = [];
 
     protected override async Task OnInitializedAsync() =>

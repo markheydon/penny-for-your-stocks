@@ -24,11 +24,11 @@
             <ValidationSummary class="text-red-600 text-sm" role="alert" />
             <div class="mb-4 space-y-1">
                 <InputText @bind-Value="Input.TwoFactorCode" id="Input.TwoFactorCode" class="trial-input" autocomplete="off" />
-                <label for="Input.TwoFactorCode" class="block text-sm font-medium text-slate-700">Authenticator code</label>
+                <label for="Input.TwoFactorCode" class="form-label">Authenticator code</label>
                 <ValidationMessage For="() => Input.TwoFactorCode" class="text-red-600 text-sm" />
             </div>
             <div class="mb-4 flex items-center gap-2 text-sm">
-                <label for="remember-machine" class="block text-sm font-medium text-slate-700">
+                <label for="remember-machine" class="form-label">
                     <InputCheckbox @bind-Value="Input.RememberMachine" />
                     Remember this machine
                 </label>

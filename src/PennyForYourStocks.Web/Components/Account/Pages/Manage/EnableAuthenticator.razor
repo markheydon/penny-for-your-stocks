@@ -51,7 +51,7 @@ else
                         <EditForm Model="Input" FormName="send-code" OnValidSubmit="OnValidSubmitAsync" method="post">
                             <DataAnnotationsValidator />
                             <div class="mb-4">
-                                <label for="Input.Code" class="block text-sm font-medium text-slate-700">Verification code</label>
+                                <label for="Input.Code" class="form-label">Verification code</label>
                                 <InputText @bind-Value="Input.Code" id="Input.Code" class="trial-input mt-1" autocomplete="off" placeholder="000000" />
                                 <ValidationMessage For="() => Input.Code" class="mt-1 text-sm text-red-600" />
                             </div>

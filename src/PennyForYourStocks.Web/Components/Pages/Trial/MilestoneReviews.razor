@@ -1,5 +1,8 @@
 @page "/trial/milestones"
+@rendermode InteractiveServer
 @attribute [Microsoft.AspNetCore.Authorization.Authorize]
+@using System.ComponentModel.DataAnnotations
+@using PennyForYourStocks.Application
 @using PennyForYourStocks.Application.Policies
 @inject MilestoneReviewService MilestoneService
 
@@ -17,31 +20,52 @@
     </ul>
 }
 
-<EditForm Model="review" OnValidSubmit="SaveReviewAsync" FormName="milestone-review" class="trial-card space-y-3">
-    <InputSelect @bind-Value="review.ReviewType" class="trial-input">
-        @foreach (var type in Enum.GetValues<Domain.ReviewType>())
-        {
-            <option value="@type">@type</option>
-        }
-    </InputSelect>
-    <InputDate @bind-Value="decisionDateModel" class="trial-input" />
-    <InputTextArea @bind-Value="review.JudgementText" class="trial-input" rows="4" placeholder="Plain-language judgement" />
-    <InputSelect @bind-Value="review.HopeStatus" class="trial-input">
-        <option value="">Hope status (optional)</option>
-        @foreach (var status in Enum.GetValues<Domain.HopeStatus>())
-        {
-            <option value="@status">@status</option>
-        }
-    </InputSelect>
-    <label class="inline-flex items-center gap-2 text-sm">
-        <InputCheckbox @bind-Value="review.FurtherCapitalInScope" />
-        Further capital in scope (short-term)
-    </label>
+<EditForm Model="review" OnValidSubmit="SaveReviewAsync" FormName="milestone-review" class="trial-card space-y-4">
+    <DataAnnotationsValidator />
+    <ValidationSummary class="text-red-600 text-sm" role="alert" />
+
     @if (message is not null)
     {
-        <p class="text-sm">@message</p>
+        <p class="text-sm @(message.StartsWith("Error", StringComparison.OrdinalIgnoreCase) ? "text-red-600" : "text-green-800")" role="alert">@message</p>
     }
-    <button type="submit" class="trial-btn">Save review</button>
+
+    <div>
+        <label class="form-label" for="review-type">Review type</label>
+        <InputSelect @bind-Value="review.ReviewType" class="trial-input" id="review-type">
+            @foreach (var type in Enum.GetValues<Domain.ReviewType>())
+            {
+                <option value="@type">@FormatReviewType(type)</option>
+            }
+        </InputSelect>
+    </div>
+    <div>
+        <label class="form-label" for="review-date">Decision date</label>
+        <InputDate @bind-Value="decisionDateModel" class="trial-input" id="review-date" />
+    </div>
+    <div>
+        <label class="form-label" for="review-judgement">Judgement <span class="text-red-600" aria-hidden="true">*</span></label>
+        <InputTextArea @bind-Value="review.JudgementText" class="trial-input" rows="4" id="review-judgement" placeholder="Plain-language judgement" />
+        <ValidationMessage For="() => review.JudgementText" class="mt-1 text-sm text-red-600" />
+    </div>
+    <div>
+        <label class="form-label" for="review-hope">Hope status (optional)</label>
+        <InputSelect @bind-Value="review.HopeStatus" class="trial-input" id="review-hope">
+            <option value="">Hope status (optional)</option>
+            @foreach (var status in Enum.GetValues<Domain.HopeStatus>())
+            {
+                <option value="@status">@FormatHopeStatus(status)</option>
+            }
+        </InputSelect>
+    </div>
+    <div>
+        <label class="form-label-inline">
+            <InputCheckbox @bind-Value="review.FurtherCapitalInScope" />
+            Further capital in scope (short-term)
+        </label>
+    </div>
+    <div>
+        <button type="submit" class="trial-btn">Save review</button>
+    </div>
 </EditForm>
 
 @code {
@@ -58,12 +82,14 @@
         }
         catch (Application.TrialValidationException ex)
         {
-            message = ex.Message;
+            message = $"Error: {ex.Message}";
         }
     }
 
     private async Task SaveReviewAsync()
     {
+        message = null;
+
         try
         {
             await MilestoneService.UpsertReviewAsync(new Application.Models.MilestoneReviewUpsertRequest(
@@ -78,15 +104,36 @@
         }
         catch (Application.TrialValidationException ex)
         {
-            message = ex.Message;
+            message = $"Error: {ex.Message}";
         }
     }
+
+    private static string FormatReviewType(Domain.ReviewType type) => type switch
+    {
+        Domain.ReviewType.ShortTerm3Month => "Short term (3 month)",
+        Domain.ReviewType.StopOrContinue12Month => "Stop or continue (12 month)",
+        Domain.ReviewType.FollowUp18Month => "Follow up (18 month)",
+        Domain.ReviewType.EarlyStop => "Early stop",
+        _ => type.ToString(),
+    };
+
+    private static string FormatHopeStatus(Domain.HopeStatus status) => status switch
+    {
+        Domain.HopeStatus.Open => "Open",
+        Domain.HopeStatus.Failed => "Failed",
+        _ => status.ToString(),
+    };
 
     private sealed class ReviewForm
     {
         public Domain.ReviewType ReviewType { get; set; }
+
+        [Required(ErrorMessage = "Judgement text is required.")]
+        [MaxLength(TrialFieldLimits.JudgementText, ErrorMessage = "Judgement text is too long.")]
         public string JudgementText { get; set; } = string.Empty;
+
         public Domain.HopeStatus? HopeStatus { get; set; }
+
         public bool FurtherCapitalInScope { get; set; }
     }
 }

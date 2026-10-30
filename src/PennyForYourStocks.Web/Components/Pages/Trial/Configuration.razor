@@ -1,5 +1,7 @@
 @page "/trial/configuration"
+@rendermode InteractiveServer
 @attribute [Microsoft.AspNetCore.Authorization.Authorize]
+@using System.ComponentModel.DataAnnotations
 @inject TrialConfigurationService ConfigurationService
 
 <PageTitle>Trial configuration</PageTitle>
@@ -7,50 +9,62 @@
 <TrialGuardrailsBanner />
 
 <EditForm Model="model" OnValidSubmit="SaveAsync" FormName="trial-config" class="trial-card space-y-4">
+    <DataAnnotationsValidator />
+    <ValidationSummary class="text-red-600 text-sm" role="alert" />
+
+    @if (message is not null)
+    {
+        <p class="text-sm @(message.StartsWith("Error", StringComparison.OrdinalIgnoreCase) ? "text-red-600" : "text-green-800")" role="alert">@message</p>
+    }
+
     <div>
-        <label class="block text-sm font-medium">Trial start date</label>
-        <InputDate @bind-Value="startDateModel" class="trial-input" />
+        <label class="form-label" for="config-start">Trial start date</label>
+        <InputDate @bind-Value="startDateModel" class="trial-input" id="config-start" />
     </div>
     <div>
-        <label class="block text-sm font-medium">Opening ring-fenced amount (GBP)</label>
-        <InputNumber @bind-Value="model.OpeningRingFencedAmount" class="trial-input" />
+        <label class="form-label" for="config-opening">Opening ring-fenced amount (GBP) <span class="text-red-600" aria-hidden="true">*</span></label>
+        <InputNumber @bind-Value="model.OpeningRingFencedAmount" class="trial-input" id="config-opening" />
+        <ValidationMessage For="() => model.OpeningRingFencedAmount" class="mt-1 text-sm text-red-600" />
     </div>
     <fieldset class="space-y-2">
-        <legend class="text-sm font-medium">Permitted regions</legend>
+        <legend class="form-legend">Permitted regions <span class="text-red-600" aria-hidden="true">*</span></legend>
+        <div class="flex flex-col gap-2">
         @foreach (var region in Enum.GetValues<Domain.TrialRegion>())
         {
-            <label class="flex items-center gap-2 text-sm">
+            <label class="form-label-inline">
                 <input type="checkbox" checked="@model.Regions.Contains(region)" @onchange="e => ToggleRegion(region, e)" />
                 @region
             </label>
         }
+        </div>
+        @if (regionError is not null)
+        {
+            <p class="text-sm text-red-600" role="alert">@regionError</p>
+        }
     </fieldset>
     <div>
-        <label class="block text-sm">Excluded themes notes</label>
-        <InputTextArea @bind-Value="model.ExcludedThemesNotes" class="trial-input" rows="2" />
+        <label class="form-label" for="config-themes">Excluded themes notes</label>
+        <InputTextArea @bind-Value="model.ExcludedThemesNotes" class="trial-input" rows="2" id="config-themes" />
     </div>
     <div class="flex flex-wrap gap-4 text-sm">
-        <label class="inline-flex items-center gap-2"><InputCheckbox @bind-Value="model.RealSharesOnly" /> Real shares only</label>
-        <label class="inline-flex items-center gap-2"><InputCheckbox @bind-Value="model.NoLeverageOrDerivatives" /> No leverage or derivatives</label>
+        <label class="form-label-inline"><InputCheckbox @bind-Value="model.RealSharesOnly" /> Real shares only</label>
+        <label class="form-label-inline"><InputCheckbox @bind-Value="model.NoLeverageOrDerivatives" /> No leverage or derivatives</label>
     </div>
     <div class="grid gap-3 md:grid-cols-2">
         <div>
-            <label class="block text-sm">Intended hold days (min)</label>
-            <InputNumber @bind-Value="model.IntendedHoldDaysMin" class="trial-input" />
+            <label class="form-label" for="config-hold-min">Intended hold days (min)</label>
+            <InputNumber @bind-Value="model.IntendedHoldDaysMin" class="trial-input" id="config-hold-min" />
         </div>
         <div>
-            <label class="block text-sm">Intended hold days (max)</label>
-            <InputNumber @bind-Value="model.IntendedHoldDaysMax" class="trial-input" />
+            <label class="form-label" for="config-hold-max">Intended hold days (max)</label>
+            <InputNumber @bind-Value="model.IntendedHoldDaysMax" class="trial-input" id="config-hold-max" />
+            <ValidationMessage For="() => model.IntendedHoldDaysMax" class="mt-1 text-sm text-red-600" />
         </div>
     </div>
     <div>
-        <label class="block text-sm">Non-trial holdings note (e.g. ISA)</label>
-        <InputTextArea @bind-Value="model.NonTrialHoldingsNote" class="trial-input" rows="2" />
+        <label class="form-label" for="config-non-trial">Non-trial holdings note (e.g. ISA)</label>
+        <InputTextArea @bind-Value="model.NonTrialHoldingsNote" class="trial-input" rows="2" id="config-non-trial" />
     </div>
-    @if (message is not null)
-    {
-        <p class="text-sm">@message</p>
-    }
     <button type="submit" class="trial-btn">Save configuration</button>
 </EditForm>
 
@@ -58,6 +72,7 @@
     private ConfigModel model = new() { Regions = [Domain.TrialRegion.UK] };
     private DateTime startDateModel = DateTime.Today;
     private string? message;
+    private string? regionError;
 
     protected override async Task OnInitializedAsync()
     {
@@ -91,10 +106,21 @@
         {
             model.Regions.Remove(region);
         }
+
+        regionError = null;
     }
 
     private async Task SaveAsync()
     {
+        message = null;
+        regionError = null;
+
+        if (model.Regions.Count == 0)
+        {
+            regionError = "Select at least one permitted region.";
+            return;
+        }
+
         try
         {
             await ConfigurationService.UpsertAsync(new Application.Models.TrialConfigurationUpsertRequest(
@@ -111,19 +137,37 @@
         }
         catch (Application.TrialValidationException ex)
         {
-            message = ex.Message;
+            message = $"Error: {ex.Message}";
         }
     }
 
-    private sealed class ConfigModel
+    private sealed class ConfigModel : IValidatableObject
     {
+        [Range(typeof(decimal), "0.01", "79228162514264337593543950335", ErrorMessage = "Opening ring-fenced amount must be greater than zero.")]
         public decimal OpeningRingFencedAmount { get; set; } = 50m;
+
         public HashSet<Domain.TrialRegion> Regions { get; set; } = [];
+
         public string? ExcludedThemesNotes { get; set; }
+
         public bool RealSharesOnly { get; set; } = true;
+
         public bool NoLeverageOrDerivatives { get; set; } = true;
+
         public int IntendedHoldDaysMin { get; set; } = 2;
+
         public int IntendedHoldDaysMax { get; set; } = 7;
+
         public string? NonTrialHoldingsNote { get; set; }
+
+        public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
+        {
+            if (IntendedHoldDaysMin > IntendedHoldDaysMax)
+            {
+                yield return new ValidationResult(
+                    "Intended hold day minimum cannot exceed maximum.",
+                    [nameof(IntendedHoldDaysMax), nameof(IntendedHoldDaysMin)]);
+            }
+        }
     }
 }
