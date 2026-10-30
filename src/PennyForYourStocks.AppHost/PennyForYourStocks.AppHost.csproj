@@ -13,4 +13,8 @@
     <ProjectReference Include="..\PennyForYourStocks.Web\PennyForYourStocks.Web.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="CommunityToolkit.Aspire.Hosting.Sqlite" />
+  </ItemGroup>
+
 </Project>

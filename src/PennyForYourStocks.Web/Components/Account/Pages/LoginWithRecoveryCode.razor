@@ -11,24 +11,24 @@
 
 <PageTitle>Recovery code verification</PageTitle>
 
-<h1>Recovery code verification</h1>
-<hr />
+<h1 class="mb-4 text-2xl font-semibold">Recovery code verification</h1>
+<hr class="my-4 border-slate-200" />
 <StatusMessage Message="@message" />
 <p>
     You have requested to log in with a recovery code. This login will not be remembered until you provide
     an authenticator app code at log in or disable 2FA and log in again.
 </p>
-<div class="row">
+<div class="account-shell lg:grid lg:grid-cols-2 lg:gap-8">
     <div class="col-md-4">
         <EditForm Model="Input" FormName="login-with-recovery-code" OnValidSubmit="OnValidSubmitAsync" method="post">
             <DataAnnotationsValidator />
-            <ValidationSummary class="text-danger" role="alert" />
-            <div class="form-floating mb-3">
-                <InputText @bind-Value="Input.RecoveryCode" id="Input.RecoveryCode" class="form-control" autocomplete="off" placeholder="RecoveryCode" />
-                <label for="Input.RecoveryCode" class="form-label">Recovery Code</label>
-                <ValidationMessage For="() => Input.RecoveryCode" class="text-danger" />
+            <ValidationSummary class="text-red-600 text-sm" role="alert" />
+            <div class="mb-4 space-y-1">
+                <InputText @bind-Value="Input.RecoveryCode" id="Input.RecoveryCode" class="trial-input" autocomplete="off" placeholder="RecoveryCode" />
+                <label for="Input.RecoveryCode" class="block text-sm font-medium text-slate-700">Recovery Code</label>
+                <ValidationMessage For="() => Input.RecoveryCode" class="text-red-600 text-sm" />
             </div>
-            <button type="submit" class="w-100 btn btn-lg btn-primary">Log in</button>
+            <button type="submit" class="trial-btn w-full justify-center py-2.5 text-base">Log in</button>
         </EditForm>
     </div>
 </div>

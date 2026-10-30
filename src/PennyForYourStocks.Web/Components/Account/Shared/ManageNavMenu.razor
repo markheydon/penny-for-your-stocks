@@ -5,25 +5,25 @@
 
 <ul class="flex flex-col gap-1">
     <li>
-        <NavLink class="block rounded px-2 py-1 hover:bg-slate-100" href="Account/Manage" Match="NavLinkMatch.All">Profile</NavLink>
+        <NavLink class="flex items-center gap-2 rounded px-2 py-1 hover:bg-slate-100" href="Account/Manage" Match="NavLinkMatch.All">Profile</NavLink>
     </li>
     <li>
-        <NavLink class="block rounded px-2 py-1 hover:bg-slate-100" href="Account/Manage/Email">Email</NavLink>
+        <NavLink class="flex items-center gap-2 rounded px-2 py-1 hover:bg-slate-100" href="Account/Manage/Email"><LucideIcon Name="LucideIconName.Mail" /> Email</NavLink>
     </li>
     <li>
-        <NavLink class="block rounded px-2 py-1 hover:bg-slate-100" href="Account/Manage/ChangePassword">Password</NavLink>
+        <NavLink class="flex items-center gap-2 rounded px-2 py-1 hover:bg-slate-100" href="Account/Manage/ChangePassword">Password</NavLink>
     </li>
     @if (hasExternalLogins)
     {
         <li>
-            <NavLink class="block rounded px-2 py-1 hover:bg-slate-100" href="Account/Manage/ExternalLogins">External logins</NavLink>
+            <NavLink class="flex items-center gap-2 rounded px-2 py-1 hover:bg-slate-100" href="Account/Manage/ExternalLogins">External logins</NavLink>
         </li>
     }
     <li>
-        <NavLink class="block rounded px-2 py-1 hover:bg-slate-100" href="Account/Manage/TwoFactorAuthentication">Two-factor authentication</NavLink>
+        <NavLink class="flex items-center gap-2 rounded px-2 py-1 hover:bg-slate-100" href="Account/Manage/TwoFactorAuthentication"><LucideIcon Name="LucideIconName.Shield" /> Two-factor authentication</NavLink>
     </li>
     <li>
-        <NavLink class="block rounded px-2 py-1 hover:bg-slate-100" href="Account/Manage/Passkeys">Passkeys</NavLink>
+        <NavLink class="flex items-center gap-2 rounded px-2 py-1 hover:bg-slate-100" href="Account/Manage/Passkeys"><LucideIcon Name="LucideIconName.Key" /> Passkeys</NavLink>
     </li>
     <li>
         <NavLink class="block rounded px-2 py-1 hover:bg-slate-100" href="Account/Manage/PersonalData">Personal data</NavLink>

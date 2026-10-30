@@ -11,7 +11,7 @@
 <PageTitle>Reset authenticator key</PageTitle>
 
 <StatusMessage />
-<h3>Reset authenticator key</h3>
+<h3 class="mb-2 text-lg font-semibold">Reset authenticator key</h3>
 <div class="alert alert-warning" role="alert">
     <p>
         <span class="glyphicon glyphicon-warning-sign"></span>
@@ -25,7 +25,7 @@
 <div>
     <form @formname="reset-authenticator" @onsubmit="OnSubmitAsync" method="post">
         <AntiforgeryToken />
-        <button class="btn btn-danger" type="submit">Reset authenticator key</button>
+        <button class="account-btn-danger" type="submit">Reset authenticator key</button>
     </form>
 </div>
 

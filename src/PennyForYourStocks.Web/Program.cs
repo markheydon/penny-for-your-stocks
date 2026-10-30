@@ -12,9 +12,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.AddServiceDefaults();
 
-var connectionString = builder.Configuration.GetConnectionString("triallog")
-    ?? throw new InvalidOperationException("Connection string 'triallog' not found.");
-builder.Services.AddDbContext<TrialDbContext>(options => options.UseSqlite(connectionString));
+builder.AddSqliteDbContext<TrialDbContext>("triallog");
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
 builder.Services.AddRazorComponents()

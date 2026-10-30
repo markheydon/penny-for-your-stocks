@@ -17,38 +17,38 @@
 
 <PageTitle>Register</PageTitle>
 
-<h1>Register</h1>
+<h1 class="mb-4 text-2xl font-semibold">Register</h1>
 
-<div class="row">
-    <div class="col-lg-6">
+<div class="account-shell lg:grid lg:grid-cols-2 lg:gap-8">
+    <div class="">
         <StatusMessage Message="@Message" />
         <EditForm Model="Input" method="post" OnValidSubmit="RegisterUser" FormName="register">
             <DataAnnotationsValidator />
-            <h2>Create a new account.</h2>
-            <hr />
-            <ValidationSummary class="text-danger" role="alert" />
-            <div class="form-floating mb-3">
-                <InputText @bind-Value="Input.Email" id="Input.Email" class="form-control" autocomplete="username" aria-required="true" placeholder="name@example.com" />
+            <h2 class="mb-2 text-lg font-semibold">Create a new account.</h2>
+            <hr class="my-4 border-slate-200" />
+            <ValidationSummary class="text-red-600 text-sm" role="alert" />
+            <div class="mb-4 space-y-1">
+                <InputText @bind-Value="Input.Email" id="Input.Email" class="trial-input" autocomplete="username" aria-required="true" placeholder="name@example.com" />
                 <label for="Input.Email">Email</label>
-                <ValidationMessage For="() => Input.Email" class="text-danger" />
+                <ValidationMessage For="() => Input.Email" class="text-red-600 text-sm" />
             </div>
-            <div class="form-floating mb-3">
-                <InputText type="password" @bind-Value="Input.Password" id="Input.Password" class="form-control" autocomplete="new-password" aria-required="true" placeholder="password" />
+            <div class="mb-4 space-y-1">
+                <InputText type="password" @bind-Value="Input.Password" id="Input.Password" class="trial-input" autocomplete="new-password" aria-required="true" placeholder="password" />
                 <label for="Input.Password">Password</label>
-                <ValidationMessage For="() => Input.Password" class="text-danger" />
+                <ValidationMessage For="() => Input.Password" class="text-red-600 text-sm" />
             </div>
-            <div class="form-floating mb-3">
-                <InputText type="password" @bind-Value="Input.ConfirmPassword" id="Input.ConfirmPassword" class="form-control" autocomplete="new-password" aria-required="true" placeholder="password" />
+            <div class="mb-4 space-y-1">
+                <InputText type="password" @bind-Value="Input.ConfirmPassword" id="Input.ConfirmPassword" class="trial-input" autocomplete="new-password" aria-required="true" placeholder="password" />
                 <label for="Input.ConfirmPassword">Confirm Password</label>
-                <ValidationMessage For="() => Input.ConfirmPassword" class="text-danger" />
+                <ValidationMessage For="() => Input.ConfirmPassword" class="text-red-600 text-sm" />
             </div>
-            <button type="submit" class="w-100 btn btn-lg btn-primary">Register</button>
+            <button type="submit" class="trial-btn w-full justify-center py-2.5 text-base">Register</button>
         </EditForm>
     </div>
-    <div class="col-lg-4 col-lg-offset-2">
+    <div class="">
         <section>
-            <h3>Use another service to register.</h3>
-            <hr />
+            <h3 class="mb-2 text-lg font-semibold">Use another service to register.</h3>
+            <hr class="my-4 border-slate-200" />
             <ExternalLoginPicker />
         </section>
     </div>

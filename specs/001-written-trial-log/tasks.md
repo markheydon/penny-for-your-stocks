@@ -247,3 +247,8 @@ description: "Task list for feature implementation"
 - Blazor may call Application in-process; keep behaviour aligned with `contracts/http-api.md` for future HTTP clients.
 - Offline queue and Playwright E2E are out of scope for this feature (research.md §4, §9).
 - Commit after each task or logical group; stop at any checkpoint to validate story independently.
+
+## Phase 7: Convergence
+
+- [X] T065 Replace AppHost `AddConnectionString("triallog", …)` and Web hand-rolled `GetConnectionString` + `AddDbContext`/`UseSqlite` with Aspire `AddSqlite` (or equivalent hosting resource), `Aspire.Microsoft.EntityFrameworkCore.Sqlite` `AddSqliteDbContext<TrialDbContext>`, and `WithReference`; remove redundant default `ConnectionStrings:triallog` from `appsettings.json` when Aspire supplies configuration per research.md §1, plan structure decision, T007, and T018 (contradicts)
+- [X] T066 Restyle Identity account and passkey pages under `src/PennyForYourStocks.Web/Components/Account/` with Tailwind utility classes and Lucide SVG icons (navigation, passkey prompts) per `contracts/ui-stack.md` and T058 (partial)

@@ -11,7 +11,7 @@
 <PageTitle>Two-factor authentication (2FA)</PageTitle>
 
 <StatusMessage />
-<h3>Two-factor authentication (2FA)</h3>
+<h3 class="mb-2 text-lg font-semibold">Two-factor authentication (2FA)</h3>
 @if (canTrack)
 {
     if (is2faEnabled)
@@ -42,23 +42,23 @@
         {
             <form style="display: inline-block" @formname="forget-browser" @onsubmit="OnSubmitForgetBrowserAsync" method="post">
                 <AntiforgeryToken />
-                <button type="submit" class="btn btn-primary">Forget this browser</button>
+                <button type="submit" class="trial-btn">Forget this browser</button>
             </form>
         }
 
-        <a href="Account/Manage/Disable2fa" class="btn btn-primary">Disable 2FA</a>
-        <a href="Account/Manage/GenerateRecoveryCodes" class="btn btn-primary">Reset recovery codes</a>
+        <a href="Account/Manage/Disable2fa" class="trial-btn">Disable 2FA</a>
+        <a href="Account/Manage/GenerateRecoveryCodes" class="trial-btn">Reset recovery codes</a>
     }
 
-    <h4>Authenticator app</h4>
+    <h4 class="mb-2 text-base font-semibold">Authenticator app</h4>
     @if (!hasAuthenticator)
     {
-        <a href="Account/Manage/EnableAuthenticator" class="btn btn-primary">Add authenticator app</a>
+        <a href="Account/Manage/EnableAuthenticator" class="trial-btn">Add authenticator app</a>
     }
     else
     {
-        <a href="Account/Manage/EnableAuthenticator" class="btn btn-primary">Set up authenticator app</a>
-        <a href="Account/Manage/ResetAuthenticator" class="btn btn-primary">Reset authenticator app</a>
+        <a href="Account/Manage/EnableAuthenticator" class="trial-btn">Set up authenticator app</a>
+        <a href="Account/Manage/ResetAuthenticator" class="trial-btn">Reset authenticator app</a>
     }
 }
 else

@@ -1,6 +1,6 @@
 var builder = DistributedApplication.CreateBuilder(args);
 
-var trialDb = builder.AddConnectionString("triallog", "Data Source=triallog.db");
+var trialDb = builder.AddSqlite("triallog");
 
 builder.AddProject<Projects.PennyForYourStocks_Web>("web")
     .WithExternalHttpEndpoints()
