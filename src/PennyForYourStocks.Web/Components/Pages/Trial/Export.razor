@@ -1,0 +1,16 @@
+@page "/trial/export"
+@attribute [Microsoft.AspNetCore.Authorization.Authorize]
+@inject TrialExportService ExportService
+
+<PageTitle>Export trial log</PageTitle>
+<h1 class="mb-4 text-2xl font-semibold">Export</h1>
+<TrialGuardrailsBanner />
+<p class="mb-4 text-sm">Export contains personal financial notes. Store it securely.</p>
+<div class="flex flex-wrap gap-3">
+    <a class="trial-btn" href="/api/v1/trial/export?format=json" target="_blank">Download JSON</a>
+    <a class="trial-btn" href="/api/v1/trial/export?format=csv" target="_blank">Download CSV</a>
+</div>
+
+@code {
+    // Links hit authorised minimal API endpoints directly.
+}

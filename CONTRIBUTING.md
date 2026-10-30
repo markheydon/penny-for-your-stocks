@@ -1,14 +1,18 @@
 # Contributing
 
-Read [GOALS.md](GOALS.md), [SCOPE.md](SCOPE.md), [CONVENTIONS.md](CONVENTIONS.md), and [VERSIONING.md](VERSIONING.md).
+Read [GOALS.md](GOALS.md), [SCOPE.md](SCOPE.md), [CONVENTIONS.md](CONVENTIONS.md), and [VERSIONING.md](VERSIONING.md). AI coding agents should also read [AGENTS.md](AGENTS.md).
+
+Run the app locally with `aspire run` (see [README.md](README.md) for HTTPS certificate notes in Dev Containers).
 
 ## Development
 
 ```bash
-dotnet format Repo.slnx --verify-no-changes
-dotnet build Repo.slnx -c Release -warnaserror
-dotnet test Repo.slnx -c Release --no-build
+dotnet format PennyForYourStocks.slnx --verify-no-changes
+dotnet build PennyForYourStocks.slnx -c Release -warnaserror
+dotnet test PennyForYourStocks.slnx -c Release --no-build
 ```
+
+Active feature work under `specs/` follows Spec Kit artifacts (`spec.md`, `plan.md`, `tasks.md`); see [AGENTS.md](AGENTS.md) for agent commands.
 
 ## Pull requests
 

@@ -5,9 +5,16 @@
     <Platform Name="x86" />
   </Configurations>
   <Folder Name="/src/">
-    <Project Path="src/PennyForYourStocks/PennyForYourStocks.csproj" />
+    <Project Path="src/PennyForYourStocks.AppHost/PennyForYourStocks.AppHost.csproj" />
+    <Project Path="src/PennyForYourStocks.Application/PennyForYourStocks.Application.csproj" />
+    <Project Path="src/PennyForYourStocks.Domain/PennyForYourStocks.Domain.csproj" />
+    <Project Path="src/PennyForYourStocks.Infrastructure/PennyForYourStocks.Infrastructure.csproj" />
+    <Project Path="src/PennyForYourStocks.ServiceDefaults/PennyForYourStocks.ServiceDefaults.csproj" />
+    <Project Path="src/PennyForYourStocks.Web/PennyForYourStocks.Web.csproj" />
   </Folder>
   <Folder Name="/tests/">
-    <Project Path="tests/PennyForYourStocks.Tests/PennyForYourStocks.Tests.csproj" />
+    <Project Path="tests/PennyForYourStocks.Application.Tests/PennyForYourStocks.Application.Tests.csproj" />
+    <Project Path="tests/PennyForYourStocks.Domain.Tests/PennyForYourStocks.Domain.Tests.csproj" />
+    <Project Path="tests/PennyForYourStocks.Infrastructure.Tests/PennyForYourStocks.Infrastructure.Tests.csproj" />
   </Folder>
 </Solution>

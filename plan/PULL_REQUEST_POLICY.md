@@ -17,8 +17,8 @@ Canonical taxonomy: [`solo-dev-board/plan/LABEL_STRATEGY.md`](https://github.com
 Examples:
 
 ```text
-[Chore] Scaffold DnsCheck.Client repository (#1)
-[Story] Implement DNS Check v1 monitoring API (#2)
+[Chore] Scaffold Penny For Your Stocks repository (#1)
+[Story] Add trial log check entry flow (#2)
 ```
 
 Do not use Conventional Commits prefixes (`feat:`, `fix:`) or raw label names in titles.
@@ -52,7 +52,7 @@ Dependabot PRs: `type/chore`, `priority/medium`, `status/todo` (see [dependabot.
 | Base branch | `main` |
 | Draft | Ready for review when CI gates pass |
 | Assignee | `markheydon` |
-| Secrets | Never commit DNS Check API keys |
+| Secrets | Never commit API keys, credentials, or live account identifiers |
 
 ---
 
@@ -62,4 +62,4 @@ Dependabot PRs: `type/chore`, `priority/medium`, `status/todo` (see [dependabot.
 2. Title matches policy.
 3. Template completed.
 4. Labels applied (`type/*`, `priority/*`, `status/in-review`).
-5. `dotnet format` / build / test pass for `Repo.slnx` (Release).
+5. `dotnet format` / build / test pass for `PennyForYourStocks.slnx` (Release).

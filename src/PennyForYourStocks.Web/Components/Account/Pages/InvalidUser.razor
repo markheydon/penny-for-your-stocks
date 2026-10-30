@@ -1,0 +1,36 @@
+﻿@page "/Account/InvalidUser"
+
+@using Microsoft.AspNetCore.Identity
+@using PennyForYourStocks.Infrastructure.Identity
+
+@inject SignInManager<ApplicationUser> SignInManager
+@inject IdentityRedirectManager RedirectManager
+
+<PageTitle>Session expired</PageTitle>
+
+<h3 class="mb-2 text-lg font-semibold">Session no longer valid</h3>
+
+<div class="account-panel trial-card space-y-4 text-sm">
+    <StatusMessage />
+    <p class="text-slate-700">
+        Your browser still had a sign-in cookie, but that account is not in the database anymore.
+        That often happens after an AppHost restart when SQLite is recreated during development.
+    </p>
+    <p class="text-slate-700">Sign out (if needed) and log in or register again.</p>
+    <div class="flex flex-wrap gap-3">
+        <form method="post" action="Account/Logout">
+            <AntiforgeryToken />
+            <input type="hidden" name="returnUrl" value="" />
+            <button type="submit" class="trial-btn">Sign out</button>
+        </form>
+        <a class="trial-btn" href="Account/Login">Log in</a>
+        <a class="account-link self-center" href="Account/Register">Register</a>
+    </div>
+</div>
+
+@code {
+    protected override async Task OnInitializedAsync()
+    {
+        await SignInManager.SignOutAsync();
+    }
+}

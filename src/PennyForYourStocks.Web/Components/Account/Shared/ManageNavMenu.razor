@@ -1,0 +1,40 @@
+﻿@using Microsoft.AspNetCore.Identity
+@using PennyForYourStocks.Infrastructure.Identity
+
+@inject SignInManager<ApplicationUser> SignInManager
+
+<ul class="flex flex-col gap-1">
+    <li>
+        <NavLink class="account-nav-link" href="Account/Manage" Match="NavLinkMatch.All"><LucideIcon Name="LucideIconName.User" /> Profile</NavLink>
+    </li>
+    <li>
+        <NavLink class="account-nav-link" href="Account/Manage/Email"><LucideIcon Name="LucideIconName.Mail" /> Email</NavLink>
+    </li>
+    <li>
+        <NavLink class="account-nav-link" href="Account/Manage/ChangePassword"><LucideIcon Name="LucideIconName.Lock" /> Password</NavLink>
+    </li>
+    @if (hasExternalLogins)
+    {
+        <li>
+            <NavLink class="account-nav-link" href="Account/Manage/ExternalLogins">External logins</NavLink>
+        </li>
+    }
+    <li>
+        <NavLink class="account-nav-link" href="Account/Manage/TwoFactorAuthentication"><LucideIcon Name="LucideIconName.Shield" /> Two-factor authentication</NavLink>
+    </li>
+    <li>
+        <NavLink class="account-nav-link" href="Account/Manage/Passkeys"><LucideIcon Name="LucideIconName.Key" /> Passkeys</NavLink>
+    </li>
+    <li>
+        <NavLink class="account-nav-link" href="Account/Manage/PersonalData"><LucideIcon Name="LucideIconName.Download" /> Personal data</NavLink>
+    </li>
+</ul>
+
+@code {
+    private bool hasExternalLogins;
+
+    protected override async Task OnInitializedAsync()
+    {
+        hasExternalLogins = (await SignInManager.GetExternalAuthenticationSchemesAsync()).Any();
+    }
+}

@@ -1,0 +1,52 @@
+@inject IJSRuntime Js
+@using PennyForYourStocks.Domain
+
+<div class="trial-card">
+    <h2 class="mb-2 font-medium">Hope comparison (text summary)</h2>
+    <p class="text-sm">@Summary.HopeBandLabel</p>
+    <p class="text-sm">Average monthly withdrawal observed: £@Summary.OverallAverageMonthlyWithdrawal.ToString("0.00")</p>
+    @if (Summary.MonthlyBuckets.Count > 0)
+    {
+        <ul class="mt-2 text-sm">
+            @foreach (var bucket in Summary.MonthlyBuckets)
+            {
+                <li>@bucket.YearMonth: £@bucket.TotalWithdrawn.ToString("0.00")</li>
+            }
+        </ul>
+        <canvas @ref="canvasRef"
+                class="mt-4 h-64 w-full"
+                role="img"
+                aria-label="Bar chart of observed monthly cash withdrawn compared to the hope band"></canvas>
+    }
+    else
+    {
+        <p class="mt-4 text-sm text-slate-600">
+            No monthly withdrawals recorded yet. Attribute withdrawals on weekly log entries or add cash observations to populate this comparison.
+        </p>
+    }
+    <p class="mt-2 text-xs text-slate-600">@Summary.ObservationNote</p>
+</div>
+
+@code {
+    [Parameter, EditorRequired] public Application.Models.HopeSummaryDto Summary { get; set; } = default!;
+
+    private ElementReference canvasRef;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (Summary.MonthlyBuckets.Count == 0)
+        {
+            return;
+        }
+
+        var labels = Summary.MonthlyBuckets.Select(b => b.YearMonth).ToArray();
+        var values = Summary.MonthlyBuckets.Select(b => (double)b.TotalWithdrawn).ToArray();
+        await Js.InvokeVoidAsync(
+            "hopeChart.render",
+            canvasRef,
+            labels,
+            values,
+            (double)HopeComparisonSummary.HopeBandLower,
+            (double)HopeComparisonSummary.HopeBandUpper);
+    }
+}

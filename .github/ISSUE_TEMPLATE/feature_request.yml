@@ -1,5 +1,5 @@
 name: Feature request
-description: Propose a new capability or enhancement for the SDK
+description: Propose a new capability or enhancement for the trial log application
 title: "[Story] "
 labels: [type/story, status/todo, priority/medium]
 body:
@@ -61,10 +61,10 @@ body:
     id: goals
     attributes:
       label: Goal links
-      description: Link relevant goals from GOALS.md (for example G1, G2)
+      description: Quote or paraphrase relevant bullets from GOALS.md (for example under Goals or Success Looks Like)
       placeholder: |
-        - G2 (...)
-        - G5 (...)
+        - Written trial log with stop rule
+        - No share recommendations or broker execution
     validations:
       required: true
   - type: textarea

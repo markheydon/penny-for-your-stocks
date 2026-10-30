@@ -1,0 +1,13 @@
+﻿@inherits LayoutComponentBase
+@layout PennyForYourStocks.Web.Components.Layout.MainLayout
+
+<h1 class="mb-4 text-2xl font-semibold">Manage your account</h1>
+
+<div class="grid gap-6 md:grid-cols-[12rem_1fr]">
+    <aside class="trial-card p-2 text-sm">
+        <ManageNavMenu />
+    </aside>
+    <div>
+        @Body
+    </div>
+</div>

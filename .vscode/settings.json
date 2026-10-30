@@ -24,7 +24,7 @@
         "**/obj/**": true,
         "**/.vs/**": true
     },
-    "dotnet.defaultSolution": "DnsCheck.slnx",
+    "dotnet.defaultSolution": "PennyForYourStocks.slnx",
     "dotnet.formatting.organizeImportsOnFormat": true,
     "editor.formatOnSave": true,
     "[csharp]": {

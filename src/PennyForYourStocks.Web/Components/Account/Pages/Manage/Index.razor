@@ -1,0 +1,52 @@
+﻿@page "/Account/Manage"
+
+@using Microsoft.AspNetCore.Identity
+@using PennyForYourStocks.Infrastructure.Identity
+
+@inject UserManager<ApplicationUser> UserManager
+@inject IdentityRedirectManager RedirectManager
+
+<PageTitle>Profile</PageTitle>
+
+<h3 class="mb-2 text-lg font-semibold">Profile</h3>
+<StatusMessage />
+
+<div class="account-panel trial-card space-y-4 text-sm">
+    <div>
+        <span class="form-label">Sign-in name</span>
+        <p class="mt-1 text-slate-900">@username</p>
+        <p class="mt-1 text-slate-600">This is the email address you use to sign in.</p>
+    </div>
+    <div>
+        <span class="form-label">Email</span>
+        <p class="mt-1 text-slate-900">@email</p>
+        <p class="mt-2">
+            <a class="account-link inline-flex items-center gap-1" href="Account/Manage/Email"><LucideIcon Name="LucideIconName.Mail" /> Change email</a>
+        </p>
+    </div>
+    <p class="border-t border-slate-200 pt-4 text-slate-600">
+        Use the menu to manage your password, passkeys, two-factor authentication, or personal data export.
+    </p>
+</div>
+
+@code {
+    private ApplicationUser? user;
+    private string? username;
+    private string? email;
+
+    [CascadingParameter]
+    private HttpContext HttpContext { get; set; } = default!;
+
+    protected override async Task OnInitializedAsync()
+    {
+        user = await UserManager.GetUserAsync(HttpContext.User);
+        if (user is null)
+        {
+            RedirectManager.RedirectToInvalidUser(UserManager, HttpContext);
+            return;
+        }
+
+        username = await UserManager.GetUserNameAsync(user);
+        email = await UserManager.GetEmailAsync(user);
+    }
+}

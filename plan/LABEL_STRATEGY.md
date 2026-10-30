@@ -43,8 +43,8 @@ PR titles use `[Type] <imperative summary> (#issue)` when a tracking issue exist
 | Label | Use for |
 |-------|---------|
 | `type/epic` | Named product theme spanning multiple features |
-| `type/feature` | Groups related stories (for example Foundations cluster #55) |
-| `type/story` | User-facing SDK deliverable |
+| `type/feature` | Groups related stories (for example a milestone cluster) |
+| `type/story` | User-facing application deliverable |
 | `type/enabler` | Technical prerequisite that unblocks stories |
 | `type/test` | Test coverage deliverable |
 | `type/bug` | Unexpected or broken behaviour |
@@ -107,7 +107,7 @@ These unprefixed labels are **retired** in this repository. Remove them from Git
 ## Decision guide
 
 1. Large theme spanning multiple features? → `type/epic` or `type/feature`
-2. User-facing SDK capability? → `type/story`
+2. User-facing application capability? → `type/story`
 3. Unblocks other stories technically? → `type/enabler`
 4. Test-only deliverable? → `type/test`
 5. Broken behaviour? → `type/bug`

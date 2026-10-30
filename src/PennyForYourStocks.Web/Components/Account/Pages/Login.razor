@@ -1,0 +1,170 @@
+﻿@page "/Account/Login"
+
+@using System.ComponentModel.DataAnnotations
+@using Microsoft.AspNetCore.Authentication
+@using Microsoft.AspNetCore.Identity
+@using PennyForYourStocks.Infrastructure.Identity
+
+@inject UserManager<ApplicationUser> UserManager
+@inject SignInManager<ApplicationUser> SignInManager
+@inject ILogger<Login> Logger
+@inject NavigationManager NavigationManager
+@inject IdentityRedirectManager RedirectManager
+
+<PageTitle>Log in</PageTitle>
+
+<h1 class="mb-4 text-2xl font-semibold">Log in</h1>
+<div class="account-shell @(hasExternalLogins ? "lg:grid lg:grid-cols-2 lg:gap-8" : string.Empty)">
+    <div>
+        <section>
+            <StatusMessage Message="@errorMessage" />
+            <EditForm EditContext="editContext" method="post" OnSubmit="LoginUser" FormName="login">
+                <DataAnnotationsValidator />
+                <h2 class="mb-2 text-lg font-semibold">Sign in</h2>
+                <hr class="my-4 border-slate-200" />
+                <ValidationSummary class="text-red-600 text-sm" role="alert" />
+                <div class="mb-4 space-y-1">
+                    <InputText @bind-Value="Input.Email" id="Input.Email" class="trial-input" autocomplete="username webauthn" aria-required="true" placeholder="name@example.com" />
+                    <label for="Input.Email" class="form-label">Email</label>
+                    <ValidationMessage For="() => Input.Email" class="text-red-600 text-sm" />
+                </div>
+                <div class="mb-4 space-y-1">
+                    <InputText type="password" @bind-Value="Input.Password" id="Input.Password" class="trial-input" autocomplete="current-password" aria-required="true" placeholder="password" />
+                    <label for="Input.Password" class="form-label">Password</label>
+                    <ValidationMessage For="() => Input.Password" class="text-red-600 text-sm" />
+                </div>
+                <div class="mb-4 flex items-center gap-2 text-sm">
+                    <label class="form-label-inline">
+                        <InputCheckbox @bind-Value="Input.RememberMe" class="h-4 w-4 rounded border-slate-300" />
+                        Remember me
+                    </label>
+                </div>
+                <div>
+                    <button type="submit" class="trial-btn inline-flex w-full items-center justify-center gap-2 py-2.5 text-base"><LucideIcon Name="LucideIconName.LogIn" /> Log in</button>
+                </div>
+                <hr class="my-4 border-slate-200" />
+                <div class="flex flex-col items-center gap-2">
+                    <span class="text-sm text-slate-500">OR</span>
+                    <PasskeySubmit Operation="PasskeyOperation.Request" Name="Input.Passkey" EmailName="Input.Email" class="account-link mx-auto inline-flex items-center gap-2"><LucideIcon Name="LucideIconName.Key" /> Log in with a passkey</PasskeySubmit>
+                </div>
+                <hr class="my-4 border-slate-200" />
+                <div>
+                    <p>
+                        <a href="Account/ForgotPassword">Forgot your password?</a>
+                    </p>
+                    <p>
+                        <a href="@(NavigationManager.GetUriWithQueryParameters("Account/Register", new Dictionary<string, object?> { ["ReturnUrl"] = ReturnUrl }))">Register as a new user</a>
+                    </p>
+                    <p>
+                        <a href="Account/ResendEmailConfirmation">Resend email confirmation</a>
+                    </p>
+                </div>
+            </EditForm>
+        </section>
+    </div>
+    @if (hasExternalLogins)
+    {
+        <div>
+            <section>
+                <h3 class="mb-2 text-lg font-semibold">Use another service to log in</h3>
+                <hr class="my-4 border-slate-200" />
+                <ExternalLoginPicker />
+            </section>
+        </div>
+    }
+</div>
+
+@code {
+    private string? errorMessage;
+    private EditContext editContext = default!;
+    private bool hasExternalLogins;
+
+    [CascadingParameter]
+    private HttpContext HttpContext { get; set; } = default!;
+
+    [SupplyParameterFromForm]
+    private InputModel Input { get; set; } = default!;
+
+    [SupplyParameterFromQuery]
+    private string? ReturnUrl { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        Input ??= new();
+
+        editContext = new EditContext(Input);
+
+        if (HttpMethods.IsGet(HttpContext.Request.Method))
+        {
+            // Clear the existing external cookie to ensure a clean login process
+            await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
+        }
+
+        hasExternalLogins = (await SignInManager.GetExternalAuthenticationSchemesAsync()).Any();
+    }
+
+    public async Task LoginUser()
+    {
+        if (!string.IsNullOrEmpty(Input.Passkey?.Error))
+        {
+            errorMessage = $"Error: {Input.Passkey.Error}";
+            return;
+        }
+
+        SignInResult result;
+        if (!string.IsNullOrEmpty(Input.Passkey?.CredentialJson))
+        {
+            // When performing passkey sign-in, don't perform form validation.
+            result = await SignInManager.PasskeySignInAsync(Input.Passkey.CredentialJson);
+        }
+        else
+        {
+            // If doing a password sign-in, validate the form.
+            if (!editContext.Validate())
+            {
+                return;
+            }
+
+            // This doesn't count login failures towards account lockout
+            // To enable password failures to trigger account lockout, set lockoutOnFailure: true
+            result = await SignInManager.PasswordSignInAsync(Input.Email, Input.Password, Input.RememberMe, lockoutOnFailure: false);
+        }
+
+        if (result.Succeeded)
+        {
+            Logger.LogInformation("User logged in.");
+            RedirectManager.RedirectAfterSignIn(ReturnUrl);
+        }
+        else if (result.RequiresTwoFactor)
+        {
+            RedirectManager.RedirectTo(
+                "Account/LoginWith2fa",
+                new() { ["returnUrl"] = ReturnUrl, ["rememberMe"] = Input.RememberMe });
+        }
+        else if (result.IsLockedOut)
+        {
+            Logger.LogWarning("User account locked out.");
+            RedirectManager.RedirectTo("Account/Lockout");
+        }
+        else
+        {
+            errorMessage = "Error: Invalid login attempt.";
+        }
+    }
+
+    private sealed class InputModel
+    {
+        [Required]
+        [EmailAddress]
+        public string Email { get; set; } = "";
+
+        [Required]
+        [DataType(DataType.Password)]
+        public string Password { get; set; } = "";
+
+        [Display(Name = "Remember me?")]
+        public bool RememberMe { get; set; }
+
+        public PasskeyInputModel? Passkey { get; set; }
+    }
+}

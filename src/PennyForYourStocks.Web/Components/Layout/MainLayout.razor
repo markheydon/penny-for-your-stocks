@@ -1,0 +1,26 @@
+﻿@inherits LayoutComponentBase
+
+<div class="min-h-screen">
+    <header class="border-b border-slate-200 bg-white">
+        <nav class="mx-auto flex max-w-5xl flex-wrap items-center gap-4 px-4 py-3 text-sm">
+            <a class="font-semibold" href="/">Penny For Your Stocks</a>
+            <a href="/trial/log">Weekly log</a>
+            <a href="/trial/history">History</a>
+            <a href="/trial/configuration">Trial boundaries</a>
+            <a href="/trial/pot">Pot summary</a>
+            <a href="/trial/milestones">Milestones</a>
+            <a href="/trial/milestone-12">12-month summary</a>
+            <a href="/trial/export">Export</a>
+            <a href="/Account/Manage">Account</a>
+        </nav>
+    </header>
+    <main class="mx-auto max-w-5xl px-4 py-6">
+        @Body
+    </main>
+</div>
+
+<div id="blazor-error-ui" class="guardrail" data-nosnippet>
+    An unhandled error has occurred.
+    <a href="." class="reload">Reload</a>
+    <span class="dismiss">🗙</span>
+</div>

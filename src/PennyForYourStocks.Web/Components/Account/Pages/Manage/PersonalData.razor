@@ -1,0 +1,47 @@
+﻿@page "/Account/Manage/PersonalData"
+
+@using Microsoft.AspNetCore.Identity
+@using PennyForYourStocks.Infrastructure.Identity
+
+@inject UserManager<ApplicationUser> UserManager
+@inject IdentityRedirectManager RedirectManager
+
+<PageTitle>Personal Data</PageTitle>
+
+<StatusMessage />
+<h3 class="mb-2 text-lg font-semibold">Personal data</h3>
+
+<div class="account-panel trial-card space-y-4 text-sm">
+    <p class="text-slate-700">
+        Your account stores the email, credentials, and trial log data you enter in this application.
+        You can download a copy or permanently delete your account below.
+    </p>
+    <div class="guardrail">
+        <strong>Deleting your account removes all trial log data permanently.</strong> This cannot be undone.
+    </div>
+    <div class="flex flex-wrap items-center gap-3 border-t border-slate-200 pt-4">
+        <form action="Account/Manage/DownloadPersonalData" method="post" class="inline">
+            <AntiforgeryToken />
+            <button class="trial-btn inline-flex items-center gap-2" type="submit">
+                <LucideIcon Name="LucideIconName.Download" /> Download data
+            </button>
+        </form>
+        <a href="Account/Manage/DeletePersonalData" class="account-btn-danger inline-flex items-center gap-2">
+            <LucideIcon Name="LucideIconName.Trash2" /> Delete account
+        </a>
+    </div>
+</div>
+
+@code {
+    [CascadingParameter]
+    private HttpContext HttpContext { get; set; } = default!;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var user = await UserManager.GetUserAsync(HttpContext.User);
+        if (user is null)
+        {
+            RedirectManager.RedirectToInvalidUser(UserManager, HttpContext);
+        }
+    }
+}
