@@ -17,7 +17,8 @@ UK English in documentation, comments, and user-facing text.
 
 ## Tech Stack
 
-- .NET 8.0 and .NET 10.0.
+- .NET 10.0 for application, AppHost, and test projects (`net10.0` in project files).
+- .NET Aspire AppHost with Community Toolkit SQLite hosting; run with `aspire run` (see [README.md](README.md)).
 - xUnit v3 with Microsoft.Testing.Platform; NSubstitute when mocks are required; built-in asserts only.
 
 ## Skills

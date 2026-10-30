@@ -31,7 +31,7 @@ Then run the PowerShell `Import-Certificate` lines the script prints (into `Cert
 
 ## Tailwind CSS
 
-Styles compile on every **`dotnet build`** via the [Tailwind.MSBuild](https://www.nuget.org/packages/Tailwind.MSBuild) package (MSBuild tasks + standalone Tailwind CLI—**no Node/npm**). Input: `Styles/app.css` and `tailwind.config.js`. Output: `wwwroot/css/app.css`. Restart or rebuild the Web project after changing Razor classes or Tailwind config (Aspire extension rebuild is enough).
+Styles compile on every **`dotnet build`** of the Web project via the [Tailwind.MSBuild](https://www.nuget.org/packages/Tailwind.MSBuild) package (MSBuild tasks + standalone Tailwind CLI—**no Node/npm**). Under `src/PennyForYourStocks.Web/`: input `Styles/app.css` and `tailwind.config.js`; output `wwwroot/css/app.css`. Restart or rebuild the Web project after changing Razor classes or Tailwind config (Aspire extension rebuild is enough).
 
 ## Development checks
 
@@ -45,13 +45,14 @@ dotnet test PennyForYourStocks.slnx -c Release --no-build
 
 | Path | Purpose |
 |------|---------|
-| `PennyForYourStocks.slnx` | .NET solution (AppHost, web, domain, application, infrastructure, tests) |
-| `src/PennyForYourStocks.AppHost/` | Aspire orchestration |
+| `PennyForYourStocks.slnx` | .NET 10 solution (AppHost, ServiceDefaults, Web, domain layers, tests) |
+| `src/PennyForYourStocks.AppHost/` | Aspire orchestration (SQLite, EF migrations job, Web) |
+| `src/PennyForYourStocks.ServiceDefaults/` | Shared OpenTelemetry, health, and HTTP resilience |
 | `src/PennyForYourStocks.Web/` | Blazor UI, Identity passkeys, minimal API |
 | `src/PennyForYourStocks.Domain/` | Trial rules and calculators |
 | `src/PennyForYourStocks.Application/` | Use cases and export |
 | `src/PennyForYourStocks.Infrastructure/` | EF Core `TrialDbContext`, Identity, migrations |
-| `tests/PennyForYourStocks.*.Tests/` | Unit and integration tests |
+| `tests/PennyForYourStocks.{Domain,Application,Infrastructure}.Tests/` | Unit and integration tests by layer |
 | `specs/001-written-trial-log/` | Feature specification and tasks |
 | `GOALS.md`, `SCOPE.md`, `CONVENTIONS.md` | Product and coding context |
 | `adr/` | Architectural decision records |

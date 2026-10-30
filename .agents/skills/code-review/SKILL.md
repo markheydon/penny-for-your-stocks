@@ -47,7 +47,7 @@ Flag **scope creep** (recommendations, screeners, market feeds, brokerage integr
 1. Bugs, defects, or logic errors (including trial pot arithmetic, milestone timing, same-day entry rules, and export/review flows when touched).
 2. Security and privacy (authentication, per-user data isolation, sync boundaries, export handling, and any outbound HTTP).
 3. Violations of language and test conventions in [CONVENTIONS.md](../../../CONVENTIONS.md) (async/`CancellationToken`, nullable reference types, xUnit v3, built-in asserts only, no disallowed test libraries).
-4. Architectural issues that will become expensive to fix later (layering, persistence choices, coupling that fights the current `src/PennyForYourStocks/` layout).
+4. Architectural issues that will become expensive to fix later (layering, persistence choices, coupling that fights the clean architecture layout in [CONVENTIONS.md](../../../CONVENTIONS.md) and [adr/adr-0001-aspire-clean-architecture-trial-log.md](../../../adr/adr-0001-aspire-clean-architecture-trial-log.md)).
 5. Code that is unnecessarily complex.
 6. Maintainability or testability — including missing or inadequate tests when **behaviour** changed (not for unimplemented features).
 
