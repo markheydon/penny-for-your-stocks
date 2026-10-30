@@ -51,6 +51,7 @@ public class TrialDbContext : IdentityDbContext<ApplicationUser>
             entity.Property(e => e.RowVersion)
                 .IsConcurrencyToken()
                 .IsRequired();
+            entity.HasIndex(e => new { e.UserId, e.CheckDate }).IsUnique();
             entity.HasMany(e => e.Holdings).WithOne(h => h.LogEntry).HasForeignKey(h => h.LogEntryId).OnDelete(DeleteBehavior.Cascade);
             entity.HasQueryFilter(e => _userId == null || e.UserId == _userId);
         });

@@ -1,5 +1,4 @@
-@page "/trial/log"
-@page "/trial/log/{CheckDate}"
+@page "/trial/log/{CheckDate?}"
 @rendermode InteractiveServer
 @attribute [Microsoft.AspNetCore.Authorization.Authorize]
 @using System.ComponentModel.DataAnnotations
@@ -134,7 +133,7 @@
     protected override async Task OnParametersSetAsync()
     {
         await ConfigurationService.EnsureMinimalOnboardingAsync(null);
-        if (DateOnly.TryParse(CheckDate, out var parsed))
+        if (TryGetRouteCheckDate(out var parsed))
         {
             checkDateModel = parsed.ToDateTime(TimeOnly.MinValue);
             await LoadExistingAsync(parsed);
@@ -150,6 +149,25 @@
         }
 
         ResetForNewEntry(today);
+    }
+
+    // Prefer the URL path over CheckDate — dual routes could leave a stale parameter on /trial/log.
+    private bool TryGetRouteCheckDate(out DateOnly checkDate)
+    {
+        checkDate = default;
+        var path = new Uri(Navigation.Uri).AbsolutePath.TrimEnd('/');
+        if (path.Equals("/trial/log", StringComparison.OrdinalIgnoreCase))
+        {
+            return false;
+        }
+
+        if (path.StartsWith("/trial/log/", StringComparison.OrdinalIgnoreCase)
+            && DateOnly.TryParse(path["/trial/log/".Length..], out checkDate))
+        {
+            return true;
+        }
+
+        return DateOnly.TryParse(CheckDate, out checkDate);
     }
 
     private void ResetForNewEntry(DateOnly checkDate)

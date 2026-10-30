@@ -221,7 +221,6 @@ namespace PennyForYourStocks.Infrastructure.Migrations
                     b.Property<byte[]>("RowVersion")
                         .IsConcurrencyToken()
                         .IsRequired()
-                        .ValueGeneratedOnAddOrUpdate()
                         .HasColumnType("BLOB");
 
                     b.Property<decimal?>("StampDuty")
@@ -293,7 +292,6 @@ namespace PennyForYourStocks.Infrastructure.Migrations
                     b.Property<byte[]>("RowVersion")
                         .IsConcurrencyToken()
                         .IsRequired()
-                        .ValueGeneratedOnAddOrUpdate()
                         .HasColumnType("BLOB");
 
                     b.Property<string>("UserId")
