@@ -9,14 +9,14 @@ namespace PennyForYourStocks.Infrastructure.Persistence;
 
 public class TrialDbContext : IdentityDbContext<ApplicationUser>
 {
-    private readonly string? _userId;
+    private readonly ITrialUserContext _userContext;
 
     protected override Version SchemaVersion => IdentitySchemaVersions.Version3;
 
     public TrialDbContext(DbContextOptions<TrialDbContext> options, ITrialUserContext userContext)
         : base(options)
     {
-        _userId = userContext.UserId;
+        _userContext = userContext;
     }
 
     public DbSet<TrialConfiguration> TrialConfigurations => Set<TrialConfiguration>();
@@ -39,7 +39,7 @@ public class TrialDbContext : IdentityDbContext<ApplicationUser>
         {
             entity.Property(e => e.OpeningRingFencedAmount).HasColumnType("decimal(18,2)");
             entity.HasIndex(e => e.UserId).IsUnique();
-            entity.HasQueryFilter(e => _userId != null && e.UserId == _userId);
+            entity.HasQueryFilter(e => _userContext.UserId != null && e.UserId == _userContext.UserId);
         });
 
         builder.Entity<LogEntry>(entity =>
@@ -53,25 +53,25 @@ public class TrialDbContext : IdentityDbContext<ApplicationUser>
                 .IsRequired();
             entity.HasIndex(e => new { e.UserId, e.CheckDate }).IsUnique();
             entity.HasMany(e => e.Holdings).WithOne(h => h.LogEntry).HasForeignKey(h => h.LogEntryId).OnDelete(DeleteBehavior.Cascade);
-            entity.HasQueryFilter(e => _userId != null && e.UserId == _userId);
+            entity.HasQueryFilter(e => _userContext.UserId != null && e.UserId == _userContext.UserId);
         });
 
         builder.Entity<LogEntryHolding>(entity =>
         {
             entity.Property(e => e.SpreadAndDealingCosts).HasColumnType("decimal(18,2)");
-            entity.HasQueryFilter(h => _userId != null && h.LogEntry!.UserId == _userId);
+            entity.HasQueryFilter(h => _userContext.UserId != null && h.LogEntry!.UserId == _userContext.UserId);
         });
 
         builder.Entity<TrialTopUp>(entity =>
         {
             entity.Property(e => e.Amount).HasColumnType("decimal(18,2)");
-            entity.HasQueryFilter(e => _userId != null && e.UserId == _userId);
+            entity.HasQueryFilter(e => _userContext.UserId != null && e.UserId == _userContext.UserId);
         });
 
         builder.Entity<CashObservation>(entity =>
         {
             entity.Property(e => e.Amount).HasColumnType("decimal(18,2)");
-            entity.HasQueryFilter(e => _userId != null && e.UserId == _userId);
+            entity.HasQueryFilter(e => _userContext.UserId != null && e.UserId == _userContext.UserId);
         });
 
         builder.Entity<MilestoneReview>(entity =>
@@ -80,7 +80,7 @@ public class TrialDbContext : IdentityDbContext<ApplicationUser>
                 .IsConcurrencyToken()
                 .IsRequired();
             entity.HasIndex(e => new { e.UserId, e.ReviewType }).IsUnique();
-            entity.HasQueryFilter(e => _userId != null && e.UserId == _userId);
+            entity.HasQueryFilter(e => _userContext.UserId != null && e.UserId == _userContext.UserId);
         });
     }
 

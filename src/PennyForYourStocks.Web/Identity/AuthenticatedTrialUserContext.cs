@@ -23,8 +23,20 @@ public sealed class AuthenticatedTrialUserContext(
                 return fromHttp;
             }
 
-            var state = authenticationStateProvider.GetAuthenticationStateAsync().GetAwaiter().GetResult();
-            return state.User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (httpContextAccessor.HttpContext is not null)
+            {
+                return null;
+            }
+
+            try
+            {
+                var state = authenticationStateProvider.GetAuthenticationStateAsync().GetAwaiter().GetResult();
+                return state.User.FindFirstValue(ClaimTypes.NameIdentifier);
+            }
+            catch (InvalidOperationException)
+            {
+                return null;
+            }
         }
     }
 }
