@@ -14,13 +14,13 @@
 <PageTitle>Log in</PageTitle>
 
 <h1 class="mb-4 text-2xl font-semibold">Log in</h1>
-<div class="account-shell lg:grid lg:grid-cols-2 lg:gap-8">
-    <div class="">
+<div class="account-shell @(hasExternalLogins ? "lg:grid lg:grid-cols-2 lg:gap-8" : string.Empty)">
+    <div>
         <section>
             <StatusMessage Message="@errorMessage" />
             <EditForm EditContext="editContext" method="post" OnSubmit="LoginUser" FormName="login">
                 <DataAnnotationsValidator />
-                <h2 class="mb-2 text-lg font-semibold">Use a local account to log in.</h2>
+                <h2 class="mb-2 text-lg font-semibold">Sign in</h2>
                 <hr class="my-4 border-slate-200" />
                 <ValidationSummary class="text-red-600 text-sm" role="alert" />
                 <div class="mb-4 space-y-1">
@@ -62,18 +62,22 @@
             </EditForm>
         </section>
     </div>
-    <div class="">
-        <section>
-            <h3 class="mb-2 text-lg font-semibold">Use another service to log in.</h3>
-            <hr class="my-4 border-slate-200" />
-            <ExternalLoginPicker />
-        </section>
-    </div>
+    @if (hasExternalLogins)
+    {
+        <div>
+            <section>
+                <h3 class="mb-2 text-lg font-semibold">Use another service to log in</h3>
+                <hr class="my-4 border-slate-200" />
+                <ExternalLoginPicker />
+            </section>
+        </div>
+    }
 </div>
 
 @code {
     private string? errorMessage;
     private EditContext editContext = default!;
+    private bool hasExternalLogins;
 
     [CascadingParameter]
     private HttpContext HttpContext { get; set; } = default!;
@@ -95,6 +99,8 @@
             // Clear the existing external cookie to ensure a clean login process
             await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
         }
+
+        hasExternalLogins = (await SignInManager.GetExternalAuthenticationSchemesAsync()).Any();
     }
 
     public async Task LoginUser()
