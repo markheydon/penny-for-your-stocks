@@ -632,8 +632,8 @@ video {
   height: 1rem;
 }
 
-.max-h-64 {
-  max-height: 16rem;
+.h-64 {
+  height: 16rem;
 }
 
 .min-h-screen {
