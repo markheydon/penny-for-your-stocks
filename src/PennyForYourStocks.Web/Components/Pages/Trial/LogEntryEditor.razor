@@ -25,7 +25,7 @@
 
     <div>
         <label class="form-label" for="log-check-date">Check date</label>
-        <InputDate @bind-Value="checkDateModel" class="trial-input" id="log-check-date" />
+        <InputDate @bind-Value="checkDateModel" @bind-Value:after="CheckDateChangedAsync" class="trial-input" id="log-check-date" />
     </div>
     <div>
         <label class="form-label" for="log-consideration">Consideration <span class="text-red-600" aria-hidden="true">*</span></label>
@@ -129,26 +129,49 @@
     private string? holdingHint;
     private readonly List<string> holdingErrors = [];
     private byte[]? rowVersion;
+    private bool _suppressCheckDateChanged;
 
     protected override async Task OnParametersSetAsync()
     {
         await ConfigurationService.EnsureMinimalOnboardingAsync(null);
         if (TryGetRouteCheckDate(out var parsed))
         {
-            checkDateModel = parsed.ToDateTime(TimeOnly.MinValue);
-            await LoadExistingAsync(parsed);
+            _suppressCheckDateChanged = true;
+            try
+            {
+                checkDateModel = parsed.ToDateTime(TimeOnly.MinValue);
+                await LoadExistingAsync(parsed);
+            }
+            finally
+            {
+                _suppressCheckDateChanged = false;
+            }
+
             return;
         }
 
-        var today = DateOnly.FromDateTime(DateTime.Today);
-        var existingToday = await LogEntryService.GetAsync(today);
-        if (existingToday is not null)
+        ResetForNewEntry(DateOnly.FromDateTime(DateTime.Today));
+    }
+
+    private async Task CheckDateChangedAsync()
+    {
+        if (_suppressCheckDateChanged)
         {
-            Navigation.NavigateTo($"/trial/log/{today:yyyy-MM-dd}", replace: true);
             return;
         }
 
-        ResetForNewEntry(today);
+        var date = DateOnly.FromDateTime(checkDateModel);
+        var entry = await LogEntryService.GetAsync(date);
+        if (entry is not null)
+        {
+            await LoadExistingAsync(date);
+            return;
+        }
+
+        if (rowVersion is not null)
+        {
+            ResetForNewEntry(date);
+        }
     }
 
     // Prefer the URL path over CheckDate — dual routes could leave a stale parameter on /trial/log.
@@ -172,14 +195,22 @@
 
     private void ResetForNewEntry(DateOnly checkDate)
     {
-        checkDateModel = checkDate.ToDateTime(TimeOnly.MinValue);
-        model = new LogEntryEditorModel { Consideration = string.Empty };
-        holdings = [new HoldingModel()];
-        rowVersion = null;
-        formError = null;
-        practiceWarning = null;
-        holdingHint = null;
-        holdingErrors.Clear();
+        _suppressCheckDateChanged = true;
+        try
+        {
+            checkDateModel = checkDate.ToDateTime(TimeOnly.MinValue);
+            model = new LogEntryEditorModel { Consideration = string.Empty };
+            holdings = [new HoldingModel()];
+            rowVersion = null;
+            formError = null;
+            practiceWarning = null;
+            holdingHint = null;
+            holdingErrors.Clear();
+        }
+        finally
+        {
+            _suppressCheckDateChanged = false;
+        }
     }
 
     private async Task LoadExistingAsync(DateOnly date)
