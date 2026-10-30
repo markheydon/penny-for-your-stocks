@@ -14,15 +14,9 @@ From the repository root:
 dotnet run --project src/PennyForYourStocks.AppHost/PennyForYourStocks.AppHost.csproj
 ```
 
-The AppHost publishes a `triallog` connection string to the web project and exposes HTTP health at `/health`.
+The AppHost models a SQLite resource named `triallog` and passes it to the Web project with `WithReference`. The Web app registers `TrialDbContext` through the Aspire Community Toolkit EF integration (`AddSqliteDbContext<TrialDbContext>("triallog")`); repositories and Identity resolve the context from DI. Aspire injects the database path at run time (see [Connect to SQLite](https://aspire.dev/integrations/databases/sqlite/sqlite-connect/)). HTTP health is exposed at `/health`.
 
-To run the web project alone (local development):
-
-```bash
-dotnet run --project src/PennyForYourStocks.Web/PennyForYourStocks.Web.csproj
-```
-
-Uses `ConnectionStrings:triallog` from `appsettings.json` (`Data Source=triallog.db`).
+To run the web project without the AppHost (unusual), set `ConnectionStrings:triallog` locally (for example via user secrets). There is no committed default connection string.
 
 ## Tailwind CSS
 

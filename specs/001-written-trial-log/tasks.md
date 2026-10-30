@@ -255,4 +255,4 @@ description: "Task list for feature implementation"
 
 ## Phase 8: Convergence
 
-- [ ] T067 Replace remaining Bootstrap layout and alert classes (`alert alert-*`, `col-md-*`, `form-floating`) in `src/PennyForYourStocks.Web/Components/Account/` and `Components/Account/Shared/StatusMessage.razor` with Tailwind patterns aligned to `trial-card`/`guardrail` styles in `wwwroot/css/app.css` per `contracts/ui-stack.md` and T058/T066 (partial)
+- [X] T067 Replace remaining Bootstrap layout and alert classes (`alert alert-*`, `col-md-*`, `form-floating`) in `src/PennyForYourStocks.Web/Components/Account/` and `Components/Account/Shared/StatusMessage.razor` with Tailwind patterns aligned to `trial-card`/`guardrail` styles in `wwwroot/css/app.css` per `contracts/ui-stack.md` and T058/T066 (partial)
