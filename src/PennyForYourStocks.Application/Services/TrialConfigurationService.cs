@@ -95,6 +95,22 @@ public sealed class TrialConfigurationService(
         {
             throw new TrialValidationException("Intended hold day minimum cannot exceed maximum.");
         }
+
+        if (request.IntendedHoldDaysMin < 1 || request.IntendedHoldDaysMax < 1)
+        {
+            throw new TrialValidationException("Intended hold days must be at least one.");
+        }
+
+        ValidateOptionalLength(request.ExcludedThemesNotes, TrialFieldLimits.ExcludedThemesNotes, "Excluded themes notes");
+        ValidateOptionalLength(request.NonTrialHoldingsNote, TrialFieldLimits.NonTrialHoldingsNote, "Non-trial holdings note");
+    }
+
+    private static void ValidateOptionalLength(string? value, int maxLength, string fieldName)
+    {
+        if (value?.Length > maxLength)
+        {
+            throw new TrialValidationException($"{fieldName} cannot exceed {maxLength} characters.");
+        }
     }
 
     private static TrialConfigurationDto Map(TrialConfiguration entity) =>

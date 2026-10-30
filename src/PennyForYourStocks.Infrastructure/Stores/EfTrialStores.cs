@@ -49,7 +49,9 @@ internal sealed class EfTrialWriteStore(TrialDbContext db) : ITrialWriteStore
 {
     public async Task SaveConfigurationAsync(TrialConfiguration configuration, CancellationToken cancellationToken = default)
     {
-        var tracked = await db.TrialConfigurations.FirstOrDefaultAsync(c => c.UserId == configuration.UserId, cancellationToken);
+        db.ChangeTracker.Clear();
+        var tracked = await db.TrialConfigurations
+            .FirstOrDefaultAsync(c => c.UserId == configuration.UserId, cancellationToken);
         if (tracked is null)
         {
             db.TrialConfigurations.Add(configuration);
@@ -64,21 +66,10 @@ internal sealed class EfTrialWriteStore(TrialDbContext db) : ITrialWriteStore
         await SaveChangesAsync(cancellationToken);
     }
 
-    private async Task SaveChangesAsync(CancellationToken cancellationToken)
-    {
-        try
-        {
-            await db.SaveChangesAsync(cancellationToken);
-        }
-        catch (DbUpdateConcurrencyException)
-        {
-            throw new TrialConcurrencyException();
-        }
-    }
-
     public async Task UpsertLogEntryAsync(LogEntry entry, IReadOnlyList<LogEntryHolding> holdings, CancellationToken cancellationToken = default)
     {
-        var tracked = await db.LogEntries.Include(e => e.Holdings)
+        db.ChangeTracker.Clear();
+        var tracked = await db.LogEntries.AsNoTracking().Include(e => e.Holdings)
             .FirstOrDefaultAsync(e => e.CheckDate == entry.CheckDate, cancellationToken);
 
         if (tracked is null)
@@ -93,6 +84,7 @@ internal sealed class EfTrialWriteStore(TrialDbContext db) : ITrialWriteStore
         }
         else
         {
+            db.LogEntries.Attach(tracked);
             if (entry.RowVersion is { Length: > 0 })
             {
                 db.Entry(tracked).Property(e => e.RowVersion).OriginalValue = entry.RowVersion;
@@ -114,6 +106,8 @@ internal sealed class EfTrialWriteStore(TrialDbContext db) : ITrialWriteStore
                 holding.LogEntryId = tracked.Id;
                 db.LogEntryHoldings.Add(holding);
             }
+
+            db.Entry(tracked).Property(e => e.RowVersion).IsModified = true;
         }
 
         await SaveChangesAsync(cancellationToken);
@@ -121,25 +115,30 @@ internal sealed class EfTrialWriteStore(TrialDbContext db) : ITrialWriteStore
 
     public async Task AddTopUpAsync(TrialTopUp topUp, CancellationToken cancellationToken = default)
     {
+        db.ChangeTracker.Clear();
         db.TrialTopUps.Add(topUp);
         await SaveChangesAsync(cancellationToken);
     }
 
     public async Task AddCashObservationAsync(CashObservation observation, CancellationToken cancellationToken = default)
     {
+        db.ChangeTracker.Clear();
         db.CashObservations.Add(observation);
         await SaveChangesAsync(cancellationToken);
     }
 
     public async Task UpsertMilestoneReviewAsync(MilestoneReview review, CancellationToken cancellationToken = default)
     {
-        var tracked = await db.MilestoneReviews.FirstOrDefaultAsync(r => r.ReviewType == review.ReviewType, cancellationToken);
+        db.ChangeTracker.Clear();
+        var tracked = await db.MilestoneReviews.AsNoTracking()
+            .FirstOrDefaultAsync(r => r.ReviewType == review.ReviewType, cancellationToken);
         if (tracked is null)
         {
             db.MilestoneReviews.Add(review);
         }
         else
         {
+            db.MilestoneReviews.Attach(tracked);
             if (review.RowVersion is { Length: > 0 })
             {
                 db.Entry(tracked).Property(r => r.RowVersion).OriginalValue = review.RowVersion;
@@ -149,8 +148,31 @@ internal sealed class EfTrialWriteStore(TrialDbContext db) : ITrialWriteStore
             tracked.JudgementText = review.JudgementText;
             tracked.HopeStatus = review.HopeStatus;
             tracked.FurtherCapitalInScope = review.FurtherCapitalInScope;
+            db.Entry(tracked).Property(r => r.RowVersion).IsModified = true;
         }
 
         await SaveChangesAsync(cancellationToken);
     }
+
+    private async Task SaveChangesAsync(CancellationToken cancellationToken)
+    {
+        try
+        {
+            await db.SaveChangesAsync(cancellationToken);
+            db.ChangeTracker.Clear();
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            db.ChangeTracker.Clear();
+            throw new TrialConcurrencyException();
+        }
+        catch (DbUpdateException ex) when (IsUniqueConstraintViolation(ex))
+        {
+            db.ChangeTracker.Clear();
+            throw new TrialConcurrencyException();
+        }
+    }
+
+    private static bool IsUniqueConstraintViolation(DbUpdateException exception) =>
+        exception.InnerException?.Message.Contains("UNIQUE constraint failed", StringComparison.OrdinalIgnoreCase) == true;
 }

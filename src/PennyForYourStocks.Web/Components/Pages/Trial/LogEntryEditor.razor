@@ -5,7 +5,6 @@
 @using PennyForYourStocks.Application
 @using PennyForYourStocks.Application.Models
 @using PennyForYourStocks.Application.Services
-@using Microsoft.EntityFrameworkCore
 @inject LogEntryService LogEntryService
 @inject TrialConfigurationService ConfigurationService
 @inject NavigationManager Navigation
@@ -334,10 +333,6 @@
         catch (TrialConcurrencyException)
         {
             formError = "This entry was changed on another device. Reload the page before saving again.";
-        }
-        catch (DbUpdateException)
-        {
-            formError = "Could not save this entry. Try again, or contact support if the problem continues.";
         }
     }
 

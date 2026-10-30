@@ -19,6 +19,11 @@ public sealed class TrialTopUpService(
             throw new TrialValidationException("Top-up amount must be greater than zero.");
         }
 
+        if (request.Notes?.Length > TrialFieldLimits.TopUpNotes)
+        {
+            throw new TrialValidationException($"Top-up notes cannot exceed {TrialFieldLimits.TopUpNotes} characters.");
+        }
+
         var configuration = await readStore.GetConfigurationAsync(cancellationToken);
         if (!CapitalGatePolicy.IsTopUpAllowed(configuration))
         {
@@ -50,6 +55,11 @@ public sealed class CashObservationService(
         if (request.Amount <= 0)
         {
             throw new TrialValidationException("Cash observation amount must be greater than zero.");
+        }
+
+        if (request.Notes?.Length > TrialFieldLimits.CashObservationNotes)
+        {
+            throw new TrialValidationException($"Cash observation notes cannot exceed {TrialFieldLimits.CashObservationNotes} characters.");
         }
 
         var entries = await readStore.ListLogEntriesAsync(null, null, cancellationToken);
