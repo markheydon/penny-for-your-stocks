@@ -19,7 +19,7 @@
 <hr class="my-4 border-slate-200" />
 <StatusMessage Message="@message" />
 <div class="account-shell lg:grid lg:grid-cols-2 lg:gap-8">
-    <div class="col-md-4">
+    <div class="account-panel">
         <EditForm Model="Input" FormName="resend-email-confirmation" OnValidSubmit="OnValidSubmitAsync" method="post">
             <DataAnnotationsValidator />
             <ValidationSummary class="text-red-600 text-sm" role="alert" />

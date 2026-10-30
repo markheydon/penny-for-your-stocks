@@ -252,3 +252,7 @@ description: "Task list for feature implementation"
 
 - [X] T065 Replace AppHost `AddConnectionString("triallog", …)` and Web hand-rolled `GetConnectionString` + `AddDbContext`/`UseSqlite` with Aspire `AddSqlite` (or equivalent hosting resource), `Aspire.Microsoft.EntityFrameworkCore.Sqlite` `AddSqliteDbContext<TrialDbContext>`, and `WithReference`; remove redundant default `ConnectionStrings:triallog` from `appsettings.json` when Aspire supplies configuration per research.md §1, plan structure decision, T007, and T018 (contradicts)
 - [X] T066 Restyle Identity account and passkey pages under `src/PennyForYourStocks.Web/Components/Account/` with Tailwind utility classes and Lucide SVG icons (navigation, passkey prompts) per `contracts/ui-stack.md` and T058 (partial)
+
+## Phase 8: Convergence
+
+- [ ] T067 Replace remaining Bootstrap layout and alert classes (`alert alert-*`, `col-md-*`, `form-floating`) in `src/PennyForYourStocks.Web/Components/Account/` and `Components/Account/Shared/StatusMessage.razor` with Tailwind patterns aligned to `trial-card`/`guardrail` styles in `wwwroot/css/app.css` per `contracts/ui-stack.md` and T058/T066 (partial)
