@@ -12,7 +12,15 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.AddServiceDefaults();
 
-builder.AddSqliteDbContext<TrialDbContext>("triallog");
+builder.Services.AddTrialInfrastructure();
+
+builder.Services.AddDbContext<TrialDbContext>((serviceProvider, options) =>
+{
+    var configuration = serviceProvider.GetRequiredService<IConfiguration>();
+    var connectionString = configuration.GetConnectionString("triallog")
+        ?? throw new InvalidOperationException("Connection string 'triallog' not found. Run under the AppHost or set ConnectionStrings:triallog.");
+    options.UseSqlite(connectionString);
+});
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
 builder.Services.AddRazorComponents()
@@ -51,14 +59,12 @@ builder.Services.Configure<IdentityPasskeyOptions>(options =>
 });
 
 builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
-builder.Services.AddTrialInfrastructure();
 builder.Services.AddProblemDetails();
 builder.Services.AddAuthorization();
 
 var app = builder.Build();
 
 app.MapDefaultEndpoints();
-app.MapHealthChecks("/health");
 
 if (app.Environment.IsDevelopment())
 {
@@ -79,11 +85,5 @@ app.MapTrialApi();
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
 app.MapAdditionalIdentityEndpoints();
-
-using (var scope = app.Services.CreateScope())
-{
-    var db = scope.ServiceProvider.GetRequiredService<TrialDbContext>();
-    await db.Database.MigrateAsync();
-}
 
 await app.RunAsync();

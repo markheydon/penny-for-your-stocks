@@ -35,4 +35,4 @@ Owner policy: **Tailwind CSS**, **Lucide** icons, **Chart.js** for charts. Do **
 
 ## Asset pipeline
 
-- Node-based build step in Web project (document in README during implement); CI runs `npm ci` + Tailwind build before `dotnet build` if required.
+- **Tailwind**: `Tailwind.MSBuild` on `PennyForYourStocks.Web` compiles `Styles/app.css` → `wwwroot/css/app.css` on `dotnet build` using the standalone Tailwind CLI (no Node/npm). CI relies on the same build step.

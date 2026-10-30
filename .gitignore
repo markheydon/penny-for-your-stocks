@@ -430,3 +430,10 @@ FodyWeavers.xsd
 
 # Local sample app credentials
 samples/**/appsettings.local.json
+
+# EF design-time SQLite and crash dumps (local dev)
+**/triallog-design.db
+core.*
+
+# Exported public dev cert for Windows host trust (see scripts/export-dev-cert-for-windows-host.sh)
+.local/

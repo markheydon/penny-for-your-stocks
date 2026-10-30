@@ -8,27 +8,28 @@ The project delivers an Aspire-orchestrated Blazor web app with Identity passkey
 
 ## Run with Aspire AppHost
 
-From the repository root:
+From the repository root (prefer the Aspire CLI so migrations and health orchestration match CI/local dashboards):
 
 ```bash
-dotnet run --project src/PennyForYourStocks.AppHost/PennyForYourStocks.AppHost.csproj
+aspire run
 ```
 
-The AppHost models a SQLite resource named `triallog` and passes it to the Web project with `WithReference`. The Web app registers `TrialDbContext` through the Aspire Community Toolkit EF integration (`AddSqliteDbContext<TrialDbContext>("triallog")`); repositories and Identity resolve the context from DI. Aspire injects the database path at run time (see [Connect to SQLite](https://aspire.dev/integrations/databases/sqlite/sqlite-connect/)). HTTP health is exposed at `/health`.
+Or open the AppHost project in the IDE. The AppHost path is also in `aspire.config.json` at the repo root.
 
-To run the web project without the AppHost (unusual), set `ConnectionStrings:triallog` locally (for example via user secrets). There is no committed default connection string.
+The AppHost models SQLite (`triallog`), runs EF migrations (`triallog-migrations`) via `Aspire.Hosting.EntityFrameworkCore`, then starts the Web project (`AddDotnetProject`). The dashboard shows migration completion before Web becomes healthy. Web uses Aspire-injected `ConnectionStrings:triallog` and scoped `TrialDbContext` in DI—migrations are not run from `Program.cs`.
+
+When the Dev Container serves HTTPS and your **Windows** browser warns about the certificate, trust the public dev cert on the host:
+
+```bash
+aspire certs trust --non-interactive
+./scripts/export-dev-cert-for-windows-host.sh
+```
+
+Then run the PowerShell `Import-Certificate` lines the script prints (into `Cert:\CurrentUser\Root`), fully quit the browser, and reopen the dashboard.
 
 ## Tailwind CSS
 
-Styles are built into `src/PennyForYourStocks.Web/wwwroot/css/app.css`.
-
-```bash
-cd src/PennyForYourStocks.Web
-npm ci
-npm run build:css
-```
-
-Source input: `Styles/app.css`. Re-run `npm run build:css` after changing Razor markup classes or Tailwind config.
+Styles compile on every **`dotnet build`** via the [Tailwind.MSBuild](https://www.nuget.org/packages/Tailwind.MSBuild) package (MSBuild tasks + standalone Tailwind CLI—**no Node/npm**). Input: `Styles/app.css` and `tailwind.config.js`. Output: `wwwroot/css/app.css`. Restart or rebuild the Web project after changing Razor classes or Tailwind config (Aspire extension rebuild is enough).
 
 ## Development checks
 

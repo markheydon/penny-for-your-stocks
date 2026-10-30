@@ -30,18 +30,16 @@ SQLite is **not** in the core Aspire SDK; this repository uses the [Aspire Commu
 
 | Layer | Package | Registration |
 |-------|---------|--------------|
-| **AppHost** | `CommunityToolkit.Aspire.Hosting.Sqlite` | `builder.AddSqlite("triallog")` and `WithReference(trialDb)` on the Web project ([hosting integration](https://aspire.dev/integrations/databases/sqlite/sqlite-host/)) |
-| **Web** | `CommunityToolkit.Aspire.Microsoft.EntityFrameworkCore.Sqlite` | `builder.AddSqliteDbContext<TrialDbContext>("triallog")` — connection name **must match** the AppHost resource name ([EF client integration](https://learn.microsoft.com/dotnet/aspire/community-toolkit/sqlite-entity-framework-integration)) |
+| **AppHost** | `CommunityToolkit.Aspire.Hosting.Sqlite`, `Aspire.Hosting.Dotnet`, `Aspire.Hosting.EntityFrameworkCore` | `AddSqlite("triallog")`; `AddDotnetProject` for Web; `AddEFMigrations` + `RunDatabaseUpdateOnStart()`; `web.WaitForCompletion(migrations)` |
+| **Web** | `Microsoft.EntityFrameworkCore.Sqlite` + Aspire-injected `ConnectionStrings:triallog` | Scoped `AddDbContext<TrialDbContext>` via `IConfiguration`; no `MigrateAsync()` in `Program.cs` |
 
-When the AppHost references the SQLite resource, Aspire injects connection information into the Web process (for example `ConnectionStrings:triallog` and the `TRAILLOG_DATASOURCE` environment variable described in [Connect to SQLite](https://aspire.dev/integrations/databases/sqlite/sqlite-connect/)). The EF client integration reads that configuration, registers **`TrialDbContext` in DI**, and adds SQLite health checks and OpenTelemetry hooks. Application and Infrastructure code **inject `TrialDbContext`** (via EF stores); they do not construct `Microsoft.Data.Sqlite.SqliteConnection` or call `GetConnectionString` in `Program.cs`.
+Aspire injects `ConnectionStrings:triallog` (and `TRIALLOG_DATASOURCE`) into Web and the migration job. Schema updates run through the AppHost **`triallog-migrations`** resource against `Infrastructure/Migrations` before Web starts. Web injects `TrialDbContext` only.
 
-**Not used at runtime:** committed `ConnectionStrings:triallog` in `appsettings.json`, manual `AddDbContext` + `UseSqlite(connectionString)`, or AppHost `AddConnectionString` workarounds.
+**Design-time:** `TrialDbContextFactory` / `dotnet ef` use `triallog-design.db` for authoring migrations.
 
-**Lower-level alternative (not chosen):** `CommunityToolkit.Aspire.Microsoft.Data.Sqlite` with `AddSqliteConnection("triallog")` and constructor injection of `SqliteConnection` per the connect guide. EF Core + Identity migrations require the **`AddSqliteDbContext`** path instead.
+**Avoid:** pooled `AddSqliteDbContext`, startup `MigrateAsync()`, warning suppressions for pending model changes, or committed default connection strings.
 
-**Design-time only:** `TrialDbContextFactory` (`IDesignTimeDbContextFactory`) uses a local `triallog-design.db` path for `dotnet ef` migrations; it does not participate in Aspire orchestration.
-
-First-party NuGet packages named `Aspire.Hosting.Sqlite` and `Aspire.Microsoft.EntityFrameworkCore.Sqlite` are not published; the Community Toolkit packages above are the supported integration surface on aspire.dev.
+Project v2 packages (`Aspire.Hosting.Dotnet`, `Aspire.Hosting.EntityFrameworkCore`) use the **13.6.4-preview** line aligned with the AppHost SDK until stable NuGet versions ship.
 
 ### PostgreSQL later
 

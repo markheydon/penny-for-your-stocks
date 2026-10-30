@@ -8,8 +8,17 @@
     <BlazorDisableThrowNavigationException>true</BlazorDisableThrowNavigationException>
   </PropertyGroup>
 
+  <PropertyGroup Label="Tailwind Properties">
+    <!-- Standalone Tailwind CLI (downloaded by Tailwind.MSBuild); no Node/npm required. -->
+    <TailwindVersion>v3.4.17</TailwindVersion>
+    <TailwindConfigDir>$(MSBuildProjectDirectory)</TailwindConfigDir>
+    <TailwindInputFile>Styles\app.css</TailwindInputFile>
+    <TailwindOutputFile>$(MSBuildProjectDirectory)\wwwroot\css\app.css</TailwindOutputFile>
+    <!-- Aspire/CLI builds: compile once per build. VS enables watch via Tailwind.MSBuild defaults. -->
+    <TailwindWatch Condition="'$(BuildingInsideVisualStudio)' != 'true' AND '$(DotNetWatchBuild)' != 'true'">false</TailwindWatch>
+  </PropertyGroup>
+
   <ItemGroup>
-    <PackageReference Include="CommunityToolkit.Aspire.Microsoft.EntityFrameworkCore.Sqlite" />
     <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design">
@@ -17,6 +26,10 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" />
+    <PackageReference Include="Tailwind.MSBuild">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
   </ItemGroup>
 
   <ItemGroup>

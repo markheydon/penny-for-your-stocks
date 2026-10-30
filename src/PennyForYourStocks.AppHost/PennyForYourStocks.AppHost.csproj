@@ -10,10 +10,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\PennyForYourStocks.Web\PennyForYourStocks.Web.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
+    <PackageReference Include="Aspire.Hosting.Dotnet" />
+    <PackageReference Include="Aspire.Hosting.EntityFrameworkCore" />
     <PackageReference Include="CommunityToolkit.Aspire.Hosting.Sqlite" />
   </ItemGroup>
 
