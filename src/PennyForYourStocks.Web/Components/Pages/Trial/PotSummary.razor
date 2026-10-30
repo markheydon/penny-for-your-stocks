@@ -14,7 +14,7 @@
 
 @if (error is not null)
 {
-    <p class="guardrail">@error</p>
+    <p class="guardrail">@error @if (needsConfiguration) { <span>Go to <a class="account-link" href="/trial/configuration">Trial boundaries</a>.</span> }</p>
 }
 else if (pot is not null)
 {
@@ -32,6 +32,7 @@ else if (pot is not null)
     private Application.Models.PotSummaryDto? pot;
     private string? nonTrialNote;
     private string? error;
+    private bool needsConfiguration;
 
     protected override async Task OnInitializedAsync()
     {
@@ -40,6 +41,11 @@ else if (pot is not null)
         try
         {
             pot = await SummaryService.GetPotSummaryAsync();
+        }
+        catch (Application.TrialValidationException)
+        {
+            needsConfiguration = true;
+            error = "Set up trial boundaries before viewing the pot summary.";
         }
         catch (Application.TrialPolicyException ex)
         {

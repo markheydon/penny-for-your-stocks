@@ -9,4 +9,7 @@ public enum LucideIconName
     Shield,
     Trash2,
     Pencil,
+    User,
+    Lock,
+    Download,
 }

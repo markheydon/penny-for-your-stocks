@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using PennyForYourStocks.Infrastructure;
 using PennyForYourStocks.Infrastructure.Identity;
 using PennyForYourStocks.Infrastructure.Persistence;
+using PennyForYourStocks.Web;
 using PennyForYourStocks.Web.Api;
 using PennyForYourStocks.Web.Components;
 using PennyForYourStocks.Web.Components.Account;
@@ -20,8 +21,9 @@ builder.Services.AddDbContext<TrialDbContext>((serviceProvider, options) =>
     var connectionString = configuration.GetConnectionString("triallog")
         ?? throw new InvalidOperationException("Connection string 'triallog' not found. Run under the AppHost or set ConnectionStrings:triallog.");
     options.UseSqlite(connectionString);
+    options.UseApplicationServiceProvider(serviceProvider);
 });
-builder.Services.AddDatabaseDeveloperPageExceptionFilter();
+builder.Services.AddExceptionHandler<DatabaseNotReadyExceptionHandler>();
 
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
@@ -69,6 +71,7 @@ app.MapDefaultEndpoints();
 if (app.Environment.IsDevelopment())
 {
     app.UseMigrationsEndPoint();
+    app.UseExceptionHandler();
 }
 else
 {
@@ -78,6 +81,9 @@ else
 
 app.UseStatusCodePagesWithReExecute("/not-found", createScopeForStatusCodePages: true);
 app.UseHttpsRedirection();
+app.UseAuthentication();
+app.UseAuthorization();
+app.UseStaleIdentitySessionCleanup();
 app.UseAntiforgery();
 
 app.MapStaticAssets();

@@ -6,6 +6,8 @@ Built primarily because apparently simply asking shares to go up isn't a viable 
 
 The project delivers an Aspire-orchestrated Blazor web app with Identity passkeys, a clean architecture trial log, and SQLite persistence. It is experimental, makes no promise of returns, and treats withdrawing about £100–£200 a month as a hope that may never be met.
 
+**Database note:** Trial and Identity data live in **`.local/triallog-data/triallog.db`** by default (gitignored, survives AppHost restarts). For deployment, set AppHost **`Triallog:DataDirectory`** to a path on your persistent disk or volume. PostgreSQL remains the later swap path if you outgrow single-file SQLite—see `adr/adr-0001-aspire-clean-architecture-trial-log.md`.
+
 ## Run with Aspire AppHost
 
 From the repository root (prefer the Aspire CLI so migrations and health orchestration match CI/local dashboards):

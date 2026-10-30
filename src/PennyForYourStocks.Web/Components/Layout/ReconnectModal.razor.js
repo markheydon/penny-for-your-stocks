@@ -1,14 +1,22 @@
-// Set up event handlers
+// Set up event handlers (dialog must exist before this module runs — see App.razor script order).
 const reconnectModal = document.getElementById("components-reconnect-modal");
-reconnectModal.addEventListener("components-reconnect-state-changed", handleReconnectStateChanged);
+if (!reconnectModal) {
+    console.error("Blazor reconnect modal element was not found; circuit reconnect UI will not appear.");
+} else {
+    reconnectModal.addEventListener("components-reconnect-state-changed", handleReconnectStateChanged);
 
-const retryButton = document.getElementById("components-reconnect-button");
-retryButton.addEventListener("click", retry);
+    const retryButton = document.getElementById("components-reconnect-button");
+    retryButton?.addEventListener("click", retry);
 
-const resumeButton = document.getElementById("components-resume-button");
-resumeButton.addEventListener("click", resume);
+    const resumeButton = document.getElementById("components-resume-button");
+    resumeButton?.addEventListener("click", resume);
+}
 
 function handleReconnectStateChanged(event) {
+    if (!reconnectModal) {
+        return;
+    }
+
     if (event.detail.state === "show") {
         reconnectModal.showModal();
     } else if (event.detail.state === "hide") {
@@ -36,10 +44,10 @@ async function retry() {
             if (!resumeSuccessful) {
                 location.reload();
             } else {
-                reconnectModal.close();
+                reconnectModal?.close();
             }
         }
-    } catch (err) {
+    } catch {
         // We got an exception, server is currently unavailable
         document.addEventListener("visibilitychange", retryWhenDocumentBecomesVisible);
     }
@@ -52,7 +60,7 @@ async function resume() {
             location.reload();
         }
     } catch {
-        reconnectModal.classList.replace("components-reconnect-paused", "components-reconnect-resume-failed");
+        reconnectModal?.classList.replace("components-reconnect-paused", "components-reconnect-resume-failed");
     }
 }
 

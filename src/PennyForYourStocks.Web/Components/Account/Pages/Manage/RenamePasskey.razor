@@ -20,10 +20,10 @@
     }
     <hr class="my-4 border-slate-200" />
     <ValidationSummary class="text-red-600 text-sm" role="alert" />
-    <div class="mb-4 space-y-1">
-        <InputText @bind-Value="Input.Name" id="Input.Name" class="trial-input" aria-required="true" placeholder="My passkey" />
+    <div class="mb-4">
         <label for="Input.Name" class="block text-sm font-medium text-slate-700">Passkey name</label>
-        <ValidationMessage For="() => Input.Name" class="text-red-600 text-sm" />
+        <InputText @bind-Value="Input.Name" id="Input.Name" class="trial-input mt-1" aria-required="true" placeholder="My passkey" />
+        <ValidationMessage For="() => Input.Name" class="mt-1 text-sm text-red-600" />
     </div>
     <div>
         <button type="submit" class="trial-btn w-full justify-center py-2.5 text-base">Continue</button>

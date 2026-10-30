@@ -133,7 +133,7 @@
         if (result.Succeeded)
         {
             Logger.LogInformation("User logged in.");
-            RedirectManager.RedirectTo(ReturnUrl);
+            RedirectManager.RedirectAfterSignIn(ReturnUrl);
         }
         else if (result.RequiresTwoFactor)
         {

@@ -57,3 +57,11 @@ body {
 .account-panel {
     @apply max-w-md;
 }
+
+.account-nav-link {
+    @apply flex items-center gap-2 rounded px-2 py-1.5 text-slate-700 hover:bg-slate-100;
+}
+
+.account-nav-link[aria-current="page"] {
+    @apply bg-slate-100 font-medium text-slate-900;
+}

@@ -6,6 +6,21 @@
 <h1 class="mb-4 text-2xl font-semibold">Chronological log</h1>
 <TrialGuardrailsBanner />
 
+@if (entries.Count == 0)
+{
+    <div class="trial-card space-y-3">
+        <p class="text-sm text-slate-700">You have not recorded any weekly checks yet. History lists each check date in order once you save entries.</p>
+        <p>
+            <a class="trial-btn" href="/trial/log">Record your first weekly check</a>
+        </p>
+        <p class="text-sm">
+            Need trial boundaries first?
+            <a class="account-link" href="/trial/configuration">Set up trial boundaries</a>
+        </p>
+    </div>
+}
+else
+{
 <ul class="space-y-3">
 @foreach (var entry in entries)
 {
@@ -23,6 +38,7 @@
     </li>
 }
 </ul>
+}
 
 @code {
     private IReadOnlyList<Application.Models.LogEntrySummaryDto> entries = [];

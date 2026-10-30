@@ -21,19 +21,19 @@
     </p>
 </div>
 
-<div>
+<div class="account-panel trial-card">
     <EditForm Model="Input" FormName="delete-user" OnValidSubmit="OnValidSubmitAsync" method="post">
         <DataAnnotationsValidator />
         <ValidationSummary class="text-red-600 text-sm" role="alert" />
         @if (requirePassword)
         {
-            <div class="mb-4 space-y-1">
-                <InputText type="password" @bind-Value="Input.Password" id="Input.Password" class="trial-input" autocomplete="current-password" aria-required="true" placeholder="Please enter your password." />
+            <div class="mb-4">
                 <label for="Input.Password" class="block text-sm font-medium text-slate-700">Password</label>
-                <ValidationMessage For="() => Input.Password" class="text-red-600 text-sm" />
+                <InputText type="password" @bind-Value="Input.Password" id="Input.Password" class="trial-input mt-1" autocomplete="current-password" aria-required="true" />
+                <ValidationMessage For="() => Input.Password" class="mt-1 text-sm text-red-600" />
             </div>
         }
-        <button class="account-btn-danger w-full justify-center py-2.5 text-base" type="submit">Delete data and close my account</button>
+        <button class="account-btn-danger inline-flex w-full items-center justify-center gap-2 py-2.5 text-base" type="submit"><LucideIcon Name="LucideIconName.Trash2" /> Delete data and close my account</button>
     </EditForm>
 </div>
 

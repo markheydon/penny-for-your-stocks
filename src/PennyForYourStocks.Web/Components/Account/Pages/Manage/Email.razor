@@ -14,43 +14,36 @@
 
 <PageTitle>Manage email</PageTitle>
 
-<h3 class="mb-2 text-lg font-semibold">Manage email</h3>
+<h3 class="mb-2 text-lg font-semibold">Email</h3>
 
 <StatusMessage Message="@message"/>
-<div class="account-shell lg:grid lg:grid-cols-2 lg:gap-8">
-    <div class="col-xl-6">
-        <form @onsubmit="OnSendEmailVerificationAsync" @formname="send-verification" id="send-verification-form" method="post">
-            <AntiforgeryToken />
-        </form>
-        <EditForm Model="Input" FormName="change-email" OnValidSubmit="OnValidSubmitAsync" method="post">
-            <DataAnnotationsValidator />
-            <ValidationSummary class="text-red-600 text-sm" role="alert" />
+
+<div class="account-panel trial-card">
+    <form @onsubmit="OnSendEmailVerificationAsync" @formname="send-verification" id="send-verification-form" method="post">
+        <AntiforgeryToken />
+    </form>
+    <EditForm Model="Input" FormName="change-email" OnValidSubmit="OnValidSubmitAsync" method="post">
+        <DataAnnotationsValidator />
+        <ValidationSummary class="text-red-600 text-sm" role="alert" />
+        <div class="mb-4">
+            <label for="email" class="block text-sm font-medium text-slate-700">Current email</label>
+            <input type="text" value="@email" id="email" class="trial-input mt-1" disabled />
             @if (isEmailConfirmed)
             {
-                <div class="mb-4 flex flex-wrap items-end gap-2">
-                    <input type="text" value="@email" id="email" class="trial-input" placeholder="Enter your email" disabled />
-                    <div class="input-group-append">
-                        <span class="h-100 input-group-text text-success font-weight-bold">✓</span>
-                    </div>
-                    <label for="email" class="block text-sm font-medium text-slate-700">Email</label>
-                </div>
+                <p class="account-alert-success mt-2">Verified</p>
             }
             else
             {
-                <div class="mb-4 space-y-1">
-                    <input type="text" value="@email" id="email" class="trial-input" placeholder="Enter your email" disabled />
-                    <label for="email" class="block text-sm font-medium text-slate-700">Email</label>
-                    <button type="submit" class="account-link" form="send-verification-form">Send verification email</button>
-                </div>
+                <button type="submit" class="account-link mt-2" form="send-verification-form">Send verification email</button>
             }
-            <div class="mb-4 space-y-1">
-                <InputText @bind-Value="Input.NewEmail" id="Input.NewEmail" class="trial-input" autocomplete="email" aria-required="true" placeholder="Enter a new email" />
-                <label for="Input.NewEmail" class="block text-sm font-medium text-slate-700">New email</label>
-                <ValidationMessage For="() => Input.NewEmail" class="text-red-600 text-sm" />
-            </div>
-            <button type="submit" class="trial-btn w-full justify-center py-2.5 text-base">Change email</button>
-        </EditForm>
-    </div>
+        </div>
+        <div class="mb-4">
+            <label for="Input.NewEmail" class="block text-sm font-medium text-slate-700">New email</label>
+            <InputText @bind-Value="Input.NewEmail" id="Input.NewEmail" class="trial-input mt-1" autocomplete="email" aria-required="true" />
+            <ValidationMessage For="() => Input.NewEmail" class="mt-1 text-sm text-red-600" />
+        </div>
+        <button type="submit" class="trial-btn inline-flex w-full items-center justify-center gap-2 py-2.5 text-base"><LucideIcon Name="LucideIconName.Mail" /> Change email</button>
+    </EditForm>
 </div>
 
 @code {

@@ -50,10 +50,10 @@ else
                     <div class="col-xl-6">
                         <EditForm Model="Input" FormName="send-code" OnValidSubmit="OnValidSubmitAsync" method="post">
                             <DataAnnotationsValidator />
-                            <div class="mb-4 space-y-1">
-                                <InputText @bind-Value="Input.Code" id="Input.Code" class="trial-input" autocomplete="off" placeholder="Enter the code" />
-                                <label for="Input.Code" class="control-label form-label">Verification Code</label>
-                                <ValidationMessage For="() => Input.Code" class="text-red-600 text-sm" />
+                            <div class="mb-4">
+                                <label for="Input.Code" class="block text-sm font-medium text-slate-700">Verification code</label>
+                                <InputText @bind-Value="Input.Code" id="Input.Code" class="trial-input mt-1" autocomplete="off" placeholder="000000" />
+                                <ValidationMessage For="() => Input.Code" class="mt-1 text-sm text-red-600" />
                             </div>
                             <button type="submit" class="trial-btn w-full justify-center py-2.5 text-base">Verify</button>
                             <ValidationSummary class="text-red-600 text-sm" role="alert" />

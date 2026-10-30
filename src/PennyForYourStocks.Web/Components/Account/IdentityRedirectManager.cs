@@ -30,6 +30,10 @@ internal sealed class IdentityRedirectManager(NavigationManager navigationManage
         navigationManager.NavigateTo(uri);
     }
 
+    /// <summary>Sends the user after sign-in or registration; empty return URLs go to trial onboarding.</summary>
+    public void RedirectAfterSignIn(string? returnUrl) =>
+        RedirectTo(string.IsNullOrWhiteSpace(returnUrl) ? "/trial/configuration" : returnUrl);
+
     public void RedirectTo(string uri, Dictionary<string, object?> queryParameters)
     {
         var uriWithoutQuery = navigationManager.ToAbsoluteUri(uri).GetLeftPart(UriPartial.Path);

@@ -1,11 +1,9 @@
 ﻿@page "/Account/Manage"
 
-@using System.ComponentModel.DataAnnotations
 @using Microsoft.AspNetCore.Identity
 @using PennyForYourStocks.Infrastructure.Identity
 
 @inject UserManager<ApplicationUser> UserManager
-@inject SignInManager<ApplicationUser> SignInManager
 @inject IdentityRedirectManager RedirectManager
 
 <PageTitle>Profile</PageTitle>
@@ -13,40 +11,34 @@
 <h3 class="mb-2 text-lg font-semibold">Profile</h3>
 <StatusMessage />
 
-<div class="account-shell lg:grid lg:grid-cols-2 lg:gap-8">
-    <div class="col-xl-6">
-        <EditForm Model="Input" FormName="profile" OnValidSubmit="OnValidSubmitAsync" method="post">
-            <DataAnnotationsValidator />
-            <ValidationSummary class="text-red-600 text-sm" role="alert" />
-            <div class="mb-4 space-y-1">
-                <input type="text" value="@username" id="username" class="trial-input" placeholder="Choose your username." disabled />
-                <label for="username" class="block text-sm font-medium text-slate-700">Username</label>
-            </div>
-            <div class="mb-4 space-y-1">
-                <InputText @bind-Value="Input.PhoneNumber" id="Input.PhoneNumber" class="trial-input" placeholder="Enter your phone number" />
-                <label for="Input.PhoneNumber" class="block text-sm font-medium text-slate-700">Phone number</label>
-                <ValidationMessage For="() => Input.PhoneNumber" class="text-red-600 text-sm" />
-            </div>
-            <button type="submit" class="trial-btn w-full justify-center py-2.5 text-base">Save</button>
-        </EditForm>
+<div class="account-panel trial-card space-y-4 text-sm">
+    <div>
+        <span class="block text-sm font-medium text-slate-700">Sign-in name</span>
+        <p class="mt-1 text-slate-900">@username</p>
+        <p class="mt-1 text-slate-600">This is the email address you use to sign in.</p>
     </div>
+    <div>
+        <span class="block text-sm font-medium text-slate-700">Email</span>
+        <p class="mt-1 text-slate-900">@email</p>
+        <p class="mt-2">
+            <a class="account-link inline-flex items-center gap-1" href="Account/Manage/Email"><LucideIcon Name="LucideIconName.Mail" /> Change email</a>
+        </p>
+    </div>
+    <p class="border-t border-slate-200 pt-4 text-slate-600">
+        Use the menu to manage your password, passkeys, two-factor authentication, or personal data export.
+    </p>
 </div>
 
 @code {
     private ApplicationUser? user;
     private string? username;
-    private string? phoneNumber;
+    private string? email;
 
     [CascadingParameter]
     private HttpContext HttpContext { get; set; } = default!;
 
-    [SupplyParameterFromForm]
-    private InputModel Input { get; set; } = default!;
-
     protected override async Task OnInitializedAsync()
     {
-        Input ??= new();
-
         user = await UserManager.GetUserAsync(HttpContext.User);
         if (user is null)
         {
@@ -55,37 +47,6 @@
         }
 
         username = await UserManager.GetUserNameAsync(user);
-        phoneNumber = await UserManager.GetPhoneNumberAsync(user);
-
-        Input.PhoneNumber ??= phoneNumber;
-    }
-
-    private async Task OnValidSubmitAsync()
-    {
-        if (user is null)
-        {
-            RedirectManager.RedirectToInvalidUser(UserManager, HttpContext);
-            return;
-        }
-
-        if (Input.PhoneNumber != phoneNumber)
-        {
-            var setPhoneResult = await UserManager.SetPhoneNumberAsync(user, Input.PhoneNumber);
-            if (!setPhoneResult.Succeeded)
-            {
-                RedirectManager.RedirectToCurrentPageWithStatus("Error: Failed to set phone number.", HttpContext);
-                return;
-            }
-        }
-
-        await SignInManager.RefreshSignInAsync(user);
-        RedirectManager.RedirectToCurrentPageWithStatus("Your profile has been updated", HttpContext);
-    }
-
-    private sealed class InputModel
-    {
-        [Phone]
-        [Display(Name = "Phone number")]
-        public string? PhoneNumber { get; set; }
+        email = await UserManager.GetEmailAsync(user);
     }
 }

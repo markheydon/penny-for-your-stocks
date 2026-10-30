@@ -9,21 +9,26 @@
 <PageTitle>Personal Data</PageTitle>
 
 <StatusMessage />
-<h3 class="mb-2 text-lg font-semibold">Personal Data</h3>
+<h3 class="mb-2 text-lg font-semibold">Personal data</h3>
 
-<div class="account-shell lg:grid lg:grid-cols-2 lg:gap-8">
-    <div class="account-panel">
-        <p>Your account contains personal data that you have given us. This page allows you to download or delete that data.</p>
-        <p>
-            <strong>Deleting this data will permanently remove your account, and this cannot be recovered.</strong>
-        </p>
-        <form action="Account/Manage/DownloadPersonalData" method="post">
+<div class="account-panel trial-card space-y-4 text-sm">
+    <p class="text-slate-700">
+        Your account stores the email, credentials, and trial log data you enter in this application.
+        You can download a copy or permanently delete your account below.
+    </p>
+    <div class="guardrail">
+        <strong>Deleting your account removes all trial log data permanently.</strong> This cannot be undone.
+    </div>
+    <div class="flex flex-wrap items-center gap-3 border-t border-slate-200 pt-4">
+        <form action="Account/Manage/DownloadPersonalData" method="post" class="inline">
             <AntiforgeryToken />
-            <button class="trial-btn" type="submit">Download</button>
+            <button class="trial-btn inline-flex items-center gap-2" type="submit">
+                <LucideIcon Name="LucideIconName.Download" /> Download data
+            </button>
         </form>
-        <p>
-            <a href="Account/Manage/DeletePersonalData" class="account-btn-danger">Delete</a>
-        </p>
+        <a href="Account/Manage/DeletePersonalData" class="account-btn-danger inline-flex items-center gap-2">
+            <LucideIcon Name="LucideIconName.Trash2" /> Delete account
+        </a>
     </div>
 </div>
 
@@ -33,7 +38,7 @@
 
     protected override async Task OnInitializedAsync()
     {
-        var user  = await UserManager.GetUserAsync(HttpContext.User);
+        var user = await UserManager.GetUserAsync(HttpContext.User);
         if (user is null)
         {
             RedirectManager.RedirectToInvalidUser(UserManager, HttpContext);

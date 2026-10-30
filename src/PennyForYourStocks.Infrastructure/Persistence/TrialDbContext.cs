@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using PennyForYourStocks.Application.Abstractions;
@@ -9,6 +10,8 @@ namespace PennyForYourStocks.Infrastructure.Persistence;
 public class TrialDbContext : IdentityDbContext<ApplicationUser>
 {
     private readonly string? _userId;
+
+    protected override Version SchemaVersion => IdentitySchemaVersions.Version3;
 
     public TrialDbContext(DbContextOptions<TrialDbContext> options, ITrialUserContext userContext)
         : base(options)

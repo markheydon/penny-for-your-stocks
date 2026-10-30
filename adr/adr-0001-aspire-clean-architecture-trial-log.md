@@ -30,16 +30,27 @@ SQLite is **not** in the core Aspire SDK; this repository uses the [Aspire Commu
 
 | Layer | Package | Registration |
 |-------|---------|--------------|
-| **AppHost** | `CommunityToolkit.Aspire.Hosting.Sqlite`, `Aspire.Hosting.Dotnet`, `Aspire.Hosting.EntityFrameworkCore` | `AddSqlite("triallog")`; `AddDotnetProject` for Web; `AddEFMigrations` + `RunDatabaseUpdateOnStart()`; `web.WaitForCompletion(migrations)` |
+| **AppHost** | `CommunityToolkit.Aspire.Hosting.Sqlite`, `Aspire.Hosting.Dotnet`, `Aspire.Hosting.EntityFrameworkCore` | `AddSqlite("triallog", dataDir, "triallog.db")` with default data dir `.local/triallog-data`; `AddDotnetProject` for Web; `AddEFMigrations` + `RunDatabaseUpdateOnStart()`; `web.WaitForCompletion(migrations)` |
 | **Web** | `Microsoft.EntityFrameworkCore.Sqlite` + Aspire-injected `ConnectionStrings:triallog` | Scoped `AddDbContext<TrialDbContext>` via `IConfiguration`; no `MigrateAsync()` in `Program.cs` |
 
 Aspire injects `ConnectionStrings:triallog` (and `TRIALLOG_DATASOURCE`) into Web and the migration job. Schema updates run through the AppHost **`triallog-migrations`** resource against `Infrastructure/Migrations` before Web starts. Web injects `TrialDbContext` only.
 
-**Design-time:** `TrialDbContextFactory` / `dotnet ef` use `triallog-design.db` for authoring migrations.
+**Design-time:** `TrialDbContextFactory` uses `triallog-design.db` only when no Aspire connection is in the environment; AppHost migration jobs and `dotnet ef` under orchestration use `ConnectionStrings__triallog` / `TRIALLOG_DATASOURCE`.
 
 **Avoid:** pooled `AddSqliteDbContext`, startup `MigrateAsync()`, warning suppressions for pending model changes, or committed default connection strings.
 
 Project v2 packages (`Aspire.Hosting.Dotnet`, `Aspire.Hosting.EntityFrameworkCore`) use the **13.6.4-preview** line aligned with the AppHost SDK until stable NuGet versions ship.
+
+### Data persistence (local vs deployed)
+
+Community Toolkit **`AddSqlite`** is configured with an explicit directory and **`triallog.db`** filename (not the toolkit default under the system temp folder). **Local default:** `.local/triallog-data/triallog.db` at the repository root (gitignored). Data survives normal AppHost stop/start. **Override:** AppHost configuration key **`Triallog:DataDirectory`** (environment variable `Triallog__DataDirectory`) for a deploy mount (for example `/var/lib/penny-for-your-stocks/data`).
+
+| Environment | Expectation |
+|-------------|-------------|
+| **Local / single-user deploy (SQLite)** | Same file path across runs; back up `triallog.db` like any important file. Deleting the file intentionally resets the app (new migrations, re-register). |
+| **Later scale-out** | **PostgreSQL** swap path remains when multi-instance or managed backup requirements exceed file SQLite. |
+
+Stale Identity cookies after a deliberate DB delete are handled in Web (`UseStaleIdentitySessionCleanup`).
 
 ### PostgreSQL later
 
@@ -60,6 +71,7 @@ Swap AppHost hosting package and Web EF client integration (for example `Aspire.
 - **NEG-002**: Package surface (Aspire, Community Toolkit, EF, Identity) requires ongoing version alignment with AppHost SDK (currently 13.x).
 - **NEG-003**: Passkey RP ID and `ServerDomain` must be configured explicitly for non-local hosts.
 - **NEG-004**: Running **Web without AppHost** requires a local `ConnectionStrings:triallog` (for example user secrets) because no default is committed; normal development should use the AppHost.
+- **NEG-005**: SQLite file must live on **persistent storage** in deployment (`Triallog:DataDirectory` on a volume); deleting `triallog.db` resets all trial and Identity data by design.
 
 ## Alternatives Considered
 

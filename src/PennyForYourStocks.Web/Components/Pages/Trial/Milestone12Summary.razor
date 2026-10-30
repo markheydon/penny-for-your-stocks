@@ -10,7 +10,7 @@
 
 @if (error is not null)
 {
-    <p class="guardrail">@error</p>
+    <p class="guardrail">@error @if (needsConfiguration) { <span>Go to <a class="account-link" href="/trial/configuration">Trial boundaries</a>.</span> }</p>
 }
 else if (summary is not null)
 {
@@ -29,12 +29,18 @@ else if (summary is not null)
 @code {
     private Application.Models.Milestone12SummaryDto? summary;
     private string? error;
+    private bool needsConfiguration;
 
     protected override async Task OnInitializedAsync()
     {
         try
         {
             summary = await SummaryService.GetMilestone12SummaryAsync();
+        }
+        catch (Application.TrialValidationException)
+        {
+            needsConfiguration = true;
+            error = "Trial boundaries are required first.";
         }
         catch (Application.TrialPolicyException ex)
         {
