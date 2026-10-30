@@ -78,7 +78,7 @@ As the investor, when I reach about 12 months of the trial (and again by about 1
 - What if the user records a highly profitable month? The app summarises observed cash but displays a fixed reminder that 12–18 months of one person’s trades cannot prove persistence or justify larger stakes on their own.
 - What if spread or tax was estimated? Entry remains valid if the user documents that figures are estimates and revises later if needed.
 - What if the user wants to stop before 12 months? The app allows an early stop judgement with reason, without replacing the scheduled 18-month optional review unless the user records one.
-- What if the user logs in from a second device after an offline session on the first? Sync resolves to one chronological log without duplicate milestone reviews; conflicts surface for the user to reconcile before summaries are finalised.
+- What if the user logs in from a second device after an offline session on the first? Sync resolves to one chronological log without duplicate milestone reviews; conflicts surface for the user to reconcile before summaries are finalised. **v1** assumes an online authoritative store (no offline queue); deferred offline behaviour is documented in [research.md](./research.md) §4.
 
 ## Requirements *(mandatory)*
 
