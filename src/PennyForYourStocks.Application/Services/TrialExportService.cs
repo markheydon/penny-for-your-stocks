@@ -46,9 +46,18 @@ public sealed class TrialExportService(
         var allEntries = await readStore.ListLogEntriesAsync(null, null, cancellationToken);
         if (PracticeModePolicy.IsSummaryCompliant(allEntries))
         {
-            var pot = await summaryService.GetPotSummaryAsync(cancellationToken);
-            var hope = await summaryService.GetHopeSummaryAsync(cancellationToken);
-            derived = new { pot, hopeComparison = hope };
+            try
+            {
+                var pot = await summaryService.GetPotSummaryAsync(cancellationToken);
+                var hope = await summaryService.GetHopeSummaryAsync(cancellationToken);
+                derived = new { pot, hopeComparison = hope };
+            }
+            catch (TrialValidationException)
+            {
+            }
+            catch (TrialPolicyException)
+            {
+            }
         }
 
         var root = new
@@ -90,7 +99,7 @@ public sealed class TrialExportService(
 
     private static string Csv(string value)
     {
-        if (value.Contains('"') || value.Contains(',') || value.Contains('\n'))
+        if (value.Contains('"') || value.Contains(',') || value.Contains('\n') || value.Contains('\r'))
         {
             return $"\"{value.Replace("\"", "\"\"", StringComparison.Ordinal)}\"";
         }

@@ -12,6 +12,23 @@ public sealed class MilestoneReviewService(
     ITrialWriteStore writeStore,
     ITrialUserContext userContext)
 {
+    /// <summary>Loads an existing review for editing, if present.</summary>
+    public async Task<MilestoneReviewUpsertRequest?> GetReviewAsync(
+        ReviewType reviewType,
+        CancellationToken cancellationToken = default)
+    {
+        var review = await readStore.GetMilestoneReviewAsync(reviewType, cancellationToken);
+        return review is null
+            ? null
+            : new MilestoneReviewUpsertRequest(
+                review.ReviewType,
+                review.DecisionDate,
+                review.JudgementText,
+                review.HopeStatus,
+                review.FurtherCapitalInScope,
+                review.RowVersion);
+    }
+
     /// <summary>Returns computed due dates and completion status.</summary>
     public async Task<MilestoneScheduleDto> GetScheduleAsync(CancellationToken cancellationToken = default)
     {
@@ -45,10 +62,12 @@ public sealed class MilestoneReviewService(
 
         var userId = RequireUserId();
         var existing = await readStore.GetMilestoneReviewAsync(request.ReviewType, cancellationToken);
-        if (existing is not null && request.RowVersion is not null
-            && !existing.RowVersion.SequenceEqual(request.RowVersion))
+        if (existing is not null)
         {
-            throw new TrialConcurrencyException();
+            if (request.RowVersion is null || !existing.RowVersion.SequenceEqual(request.RowVersion))
+            {
+                throw new TrialConcurrencyException();
+            }
         }
 
         var review = existing ?? new MilestoneReview
@@ -63,10 +82,14 @@ public sealed class MilestoneReviewService(
         review.JudgementText = request.JudgementText;
         review.HopeStatus = request.HopeStatus;
         review.FurtherCapitalInScope = request.FurtherCapitalInScope;
+        if (existing is not null)
+        {
+            review.RowVersion = request.RowVersion!;
+        }
 
         await writeStore.UpsertMilestoneReviewAsync(review, cancellationToken);
 
-        if (request.ReviewType == ReviewType.ShortTerm3Month)
+        if (request.ReviewType == ReviewType.ShortTerm3Month && request.FurtherCapitalInScope == true)
         {
             var configuration = await readStore.GetConfigurationAsync(cancellationToken);
             if (configuration is not null && configuration.ShortTermReviewCompletedAt is null)

@@ -16,7 +16,11 @@ public static class HopeComparisonSummary
         string HopeBandLabel,
         string ObservationNote);
 
-    public static Result Calculate(IReadOnlyList<LogEntry> logEntries, IReadOnlyList<CashObservation> cashObservations)
+    public static Result Calculate(
+        IReadOnlyList<LogEntry> logEntries,
+        IReadOnlyList<CashObservation> cashObservations,
+        DateOnly periodStart,
+        DateOnly periodEnd)
     {
         IReadOnlyList<(DateOnly Date, decimal Amount)> withdrawals;
         if (cashObservations.Count > 0)
@@ -33,15 +37,33 @@ public static class HopeComparisonSummary
                 .ToList();
         }
 
-        var buckets = withdrawals
-            .GroupBy(w => $"{w.Date.Year:D4}-{w.Date.Month:D2}")
-            .OrderBy(g => g.Key)
-            .Select(g => new MonthlyBucket(g.Key, g.Sum(x => x.Amount)))
-            .ToList();
+        if (periodEnd < periodStart)
+        {
+            periodEnd = periodStart;
+        }
 
-        var overallAverage = buckets.Count == 0
+        var totalsByMonth = withdrawals
+            .GroupBy(w => YearMonthKey(w.Date.Year, w.Date.Month))
+            .ToDictionary(g => g.Key, g => g.Sum(x => x.Amount));
+
+        var buckets = new List<MonthlyBucket>();
+        var cursor = new DateOnly(periodStart.Year, periodStart.Month, 1);
+        var endMonth = new DateOnly(periodEnd.Year, periodEnd.Month, 1);
+        var totalWithdrawn = 0m;
+        var monthCount = 0;
+        while (cursor <= endMonth)
+        {
+            var key = YearMonthKey(cursor.Year, cursor.Month);
+            var monthTotal = totalsByMonth.GetValueOrDefault(key);
+            buckets.Add(new MonthlyBucket(key, monthTotal));
+            totalWithdrawn += monthTotal;
+            monthCount++;
+            cursor = cursor.AddMonths(1);
+        }
+
+        var overallAverage = monthCount == 0
             ? 0m
-            : buckets.Average(b => b.TotalWithdrawn);
+            : totalWithdrawn / monthCount;
 
         return new Result(
             buckets,
@@ -49,4 +71,6 @@ public static class HopeComparisonSummary
             $"Hope band (not a target): £{HopeBandLower:0.00}–£{HopeBandUpper:0.00} per month",
             "Observed cash withdrawn only; not mark-to-market income.");
     }
+
+    private static string YearMonthKey(int year, int month) => $"{year:D4}-{month:D2}";
 }

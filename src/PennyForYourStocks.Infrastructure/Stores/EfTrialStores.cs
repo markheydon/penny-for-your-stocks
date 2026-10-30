@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using PennyForYourStocks.Application;
 using PennyForYourStocks.Application.Abstractions;
 using PennyForYourStocks.Domain;
 using PennyForYourStocks.Domain.Entities;
@@ -60,7 +61,19 @@ internal sealed class EfTrialWriteStore(TrialDbContext db) : ITrialWriteStore
             tracked.UpdatedAt = configuration.UpdatedAt;
         }
 
-        await db.SaveChangesAsync(cancellationToken);
+        await SaveChangesAsync(cancellationToken);
+    }
+
+    private async Task SaveChangesAsync(CancellationToken cancellationToken)
+    {
+        try
+        {
+            await db.SaveChangesAsync(cancellationToken);
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            throw new TrialConcurrencyException();
+        }
     }
 
     public async Task UpsertLogEntryAsync(LogEntry entry, IReadOnlyList<LogEntryHolding> holdings, CancellationToken cancellationToken = default)
@@ -103,19 +116,19 @@ internal sealed class EfTrialWriteStore(TrialDbContext db) : ITrialWriteStore
             }
         }
 
-        await db.SaveChangesAsync(cancellationToken);
+        await SaveChangesAsync(cancellationToken);
     }
 
     public async Task AddTopUpAsync(TrialTopUp topUp, CancellationToken cancellationToken = default)
     {
         db.TrialTopUps.Add(topUp);
-        await db.SaveChangesAsync(cancellationToken);
+        await SaveChangesAsync(cancellationToken);
     }
 
     public async Task AddCashObservationAsync(CashObservation observation, CancellationToken cancellationToken = default)
     {
         db.CashObservations.Add(observation);
-        await db.SaveChangesAsync(cancellationToken);
+        await SaveChangesAsync(cancellationToken);
     }
 
     public async Task UpsertMilestoneReviewAsync(MilestoneReview review, CancellationToken cancellationToken = default)
@@ -138,6 +151,6 @@ internal sealed class EfTrialWriteStore(TrialDbContext db) : ITrialWriteStore
             tracked.FurtherCapitalInScope = review.FurtherCapitalInScope;
         }
 
-        await db.SaveChangesAsync(cancellationToken);
+        await SaveChangesAsync(cancellationToken);
     }
 }

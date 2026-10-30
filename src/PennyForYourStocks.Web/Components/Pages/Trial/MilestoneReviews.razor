@@ -31,7 +31,7 @@
 
     <div>
         <label class="form-label" for="review-type">Review type</label>
-        <InputSelect @bind-Value="review.ReviewType" class="trial-input" id="review-type">
+        <InputSelect @bind-Value="review.ReviewType" @bind-Value:after="OnReviewTypeChangedAsync" class="trial-input" id="review-type">
             @foreach (var type in Enum.GetValues<Domain.ReviewType>())
             {
                 <option value="@type">@FormatReviewType(type)</option>
@@ -72,6 +72,7 @@
     private Application.Models.MilestoneScheduleDto? schedule;
     private ReviewForm review = new() { ReviewType = Domain.ReviewType.ShortTerm3Month };
     private DateTime decisionDateModel = DateTime.Today;
+    private byte[]? reviewRowVersion;
     private string? message;
 
     protected override async Task OnInitializedAsync()
@@ -79,6 +80,7 @@
         try
         {
             schedule = await MilestoneService.GetScheduleAsync();
+            await LoadReviewFormAsync(review.ReviewType);
         }
         catch (Application.TrialValidationException ex)
         {
@@ -98,14 +100,46 @@
                 review.JudgementText,
                 review.HopeStatus,
                 review.FurtherCapitalInScope,
-                null));
+                reviewRowVersion));
             message = "Review saved.";
             schedule = await MilestoneService.GetScheduleAsync();
+            await LoadReviewFormAsync(review.ReviewType);
         }
         catch (Application.TrialValidationException ex)
         {
             message = $"Error: {ex.Message}";
         }
+        catch (Application.TrialConcurrencyException)
+        {
+            message = "Error: This review was updated elsewhere. Reload the page and try again.";
+        }
+    }
+
+    private async Task OnReviewTypeChangedAsync()
+    {
+        await LoadReviewFormAsync(review.ReviewType);
+    }
+
+    private async Task LoadReviewFormAsync(Domain.ReviewType reviewType)
+    {
+        var existing = await MilestoneService.GetReviewAsync(reviewType);
+        if (existing is null)
+        {
+            review = new ReviewForm { ReviewType = reviewType };
+            decisionDateModel = DateTime.Today;
+            reviewRowVersion = null;
+            return;
+        }
+
+        review = new ReviewForm
+        {
+            ReviewType = existing.ReviewType,
+            JudgementText = existing.JudgementText,
+            HopeStatus = existing.HopeStatus,
+            FurtherCapitalInScope = existing.FurtherCapitalInScope ?? false,
+        };
+        decisionDateModel = existing.DecisionDate.ToDateTime(TimeOnly.MinValue);
+        reviewRowVersion = existing.RowVersion;
     }
 
     private static string FormatReviewType(Domain.ReviewType type) => type switch

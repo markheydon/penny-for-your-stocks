@@ -42,18 +42,7 @@ public static class PracticeModePolicy
     {
         foreach (var entry in entries)
         {
-            if (entry.PracticeModeAcknowledged)
-            {
-                continue;
-            }
-
-            var simulatedUse = !string.IsNullOrWhiteSpace(entry.PracticeModeDisclaimer);
-            if (simulatedUse && !LogEntryCostCalculator.HasRecordedCostAdjustments(entry))
-            {
-                return false;
-            }
-
-            if (!simulatedUse && !LogEntryCostCalculator.HasRecordedCostAdjustments(entry))
+            if (EntryRequiresPracticeWarning(entry))
             {
                 return false;
             }

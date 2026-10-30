@@ -35,9 +35,14 @@ public sealed class TrialSummaryService(ITrialReadStore readStore)
     /// <summary>Returns hope comparison buckets when SC-005 is satisfied.</summary>
     public async Task<HopeSummaryDto> GetHopeSummaryAsync(CancellationToken cancellationToken = default)
     {
-        var (_, entries, _, cashObservations) = await LoadAsync(cancellationToken);
+        var (configuration, entries, _, cashObservations) = await LoadAsync(cancellationToken);
         EnsureSummaryCompliance(entries);
-        var hope = HopeComparisonSummary.Calculate(entries, cashObservations);
+        var periodEnd = ResolvePeriodEnd(entries, cashObservations);
+        var hope = HopeComparisonSummary.Calculate(
+            entries,
+            cashObservations,
+            configuration.TrialStartDate,
+            periodEnd);
         return new HopeSummaryDto(
             hope.MonthlyBuckets.Select(b => new HopeMonthlyBucketDto(b.YearMonth, b.TotalWithdrawn)).ToList(),
             hope.OverallAverageMonthlyWithdrawal,
@@ -80,6 +85,30 @@ public sealed class TrialSummaryService(ITrialReadStore readStore)
 
     private static PracticeModeComplianceDto ComplianceSatisfied() =>
         new(true, null);
+
+    private static DateOnly ResolvePeriodEnd(
+        IReadOnlyList<LogEntry> entries,
+        IReadOnlyList<CashObservation> cashObservations)
+    {
+        var end = DateOnly.FromDateTime(DateTime.UtcNow);
+        foreach (var entry in entries)
+        {
+            if (entry.CheckDate > end)
+            {
+                end = entry.CheckDate;
+            }
+        }
+
+        foreach (var observation in cashObservations)
+        {
+            if (observation.ObservedDate > end)
+            {
+                end = observation.ObservedDate;
+            }
+        }
+
+        return end;
+    }
 }
 
 /// <summary>Static guardrail copy for UI and API.</summary>

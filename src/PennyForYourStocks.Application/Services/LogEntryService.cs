@@ -53,10 +53,12 @@ public sealed class LogEntryService(
         }
 
         var existing = await readStore.GetLogEntryByCheckDateAsync(checkDate, cancellationToken);
-        if (existing is not null && request.RowVersion is not null
-            && !existing.RowVersion.SequenceEqual(request.RowVersion))
+        if (existing is not null)
         {
-            throw new TrialConcurrencyException();
+            if (request.RowVersion is null || !existing.RowVersion.SequenceEqual(request.RowVersion))
+            {
+                throw new TrialConcurrencyException();
+            }
         }
 
         var holdings = MapHoldings(request.Holdings);
@@ -118,9 +120,9 @@ public sealed class LogEntryService(
         entry.ForeignExchangeFees = request.ForeignExchangeFees;
         entry.WithdrawalAttributed = request.WithdrawalAttributed;
         entry.Holdings = holdings.ToList();
-        if (existing is not null && request.RowVersion is not null)
+        if (existing is not null)
         {
-            entry.RowVersion = request.RowVersion;
+            entry.RowVersion = request.RowVersion!;
         }
 
         return entry;
@@ -136,6 +138,49 @@ public sealed class LogEntryService(
         if (request.Consideration.Length > TrialFieldLimits.Consideration)
         {
             throw new TrialValidationException($"Consideration cannot exceed {TrialFieldLimits.Consideration} characters.");
+        }
+
+        if (request.ComplianceNotes?.Length > TrialFieldLimits.ComplianceNotes)
+        {
+            throw new TrialValidationException($"Compliance notes cannot exceed {TrialFieldLimits.ComplianceNotes} characters.");
+        }
+
+        if (request.PracticeModeDisclaimer?.Length > TrialFieldLimits.PracticeModeDisclaimer)
+        {
+            throw new TrialValidationException($"Practice mode disclaimer cannot exceed {TrialFieldLimits.PracticeModeDisclaimer} characters.");
+        }
+
+        ValidateNonNegative(request.AggregatedSpreadDealingCosts, "Aggregated spread and dealing costs");
+        ValidateNonNegative(request.StampDuty, "Stamp duty");
+        ValidateNonNegative(request.ForeignExchangeFees, "Foreign exchange fees");
+        ValidateNonNegative(request.WithdrawalAttributed, "Withdrawal attributed");
+
+        foreach (var holding in request.Holdings)
+        {
+            if (string.IsNullOrWhiteSpace(holding.IdentifierOrName))
+            {
+                throw new TrialValidationException("Each holding needs an identifier or name.");
+            }
+
+            if (holding.IdentifierOrName.Length > TrialFieldLimits.IdentifierOrName)
+            {
+                throw new TrialValidationException($"Holding names cannot exceed {TrialFieldLimits.IdentifierOrName} characters.");
+            }
+
+            if (holding.Notes?.Length > TrialFieldLimits.HoldingNotes)
+            {
+                throw new TrialValidationException($"Holding notes cannot exceed {TrialFieldLimits.HoldingNotes} characters.");
+            }
+
+            ValidateNonNegative(holding.SpreadAndDealingCosts, "Spread and dealing costs");
+        }
+    }
+
+    private static void ValidateNonNegative(decimal? amount, string fieldName)
+    {
+        if (amount is < 0m)
+        {
+            throw new TrialValidationException($"{fieldName} cannot be negative.");
         }
     }
 

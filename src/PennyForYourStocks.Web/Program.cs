@@ -8,12 +8,14 @@ using PennyForYourStocks.Web;
 using PennyForYourStocks.Web.Api;
 using PennyForYourStocks.Web.Components;
 using PennyForYourStocks.Web.Components.Account;
+using PennyForYourStocks.Web.Identity;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.AddServiceDefaults();
 
 builder.Services.AddTrialInfrastructure();
+builder.Services.AddScoped<PennyForYourStocks.Application.Abstractions.ITrialUserContext, AuthenticatedTrialUserContext>();
 
 builder.Services.AddDbContext<TrialDbContext>((serviceProvider, options) =>
 {

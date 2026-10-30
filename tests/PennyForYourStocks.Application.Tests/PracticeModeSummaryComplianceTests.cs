@@ -41,4 +41,23 @@ public class PracticeModeSummaryComplianceTests
 
         Assert.True(PracticeModePolicy.IsSummaryCompliant(entries));
     }
+
+    [Fact]
+    public void IsSummaryCompliant_TrueForNoTradeEntryWithoutHoldings()
+    {
+        var entries = new List<LogEntry>
+        {
+            new()
+            {
+                Id = Guid.NewGuid(),
+                UserId = "u",
+                CheckDate = new DateOnly(2026, 1, 1),
+                Consideration = "No trades this week",
+                PracticeModeAcknowledged = false,
+                Holdings = [],
+            },
+        };
+
+        Assert.True(PracticeModePolicy.IsSummaryCompliant(entries));
+    }
 }

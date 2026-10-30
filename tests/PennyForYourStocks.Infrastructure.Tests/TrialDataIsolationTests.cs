@@ -42,7 +42,33 @@ public class TrialDataIsolationTests
         Assert.Equal("user-a", visible[0].UserId);
     }
 
-    private sealed class FixedUserContext(string userId) : ITrialUserContext
+    [Fact]
+    public async Task QueryFilter_ReturnsNoRowsWhenUserContextIsNull()
+    {
+        var cancellationToken = TestContext.Current.CancellationToken;
+        var options = new DbContextOptionsBuilder<TrialDbContext>()
+            .UseSqlite("Data Source=:memory:")
+            .Options;
+
+        await using var context = new TrialDbContext(options, new FixedUserContext(null));
+        await context.Database.OpenConnectionAsync(cancellationToken);
+        await context.Database.EnsureCreatedAsync(cancellationToken);
+
+        context.TrialConfigurations.Add(new TrialConfiguration
+        {
+            Id = Guid.NewGuid(),
+            UserId = "user-a",
+            TrialStartDate = new DateOnly(2026, 1, 1),
+            CreatedAt = DateTimeOffset.UtcNow,
+            UpdatedAt = DateTimeOffset.UtcNow,
+        });
+        await context.SaveChangesAsync(cancellationToken);
+
+        var visible = await context.TrialConfigurations.ToListAsync(cancellationToken);
+        Assert.Empty(visible);
+    }
+
+    private sealed class FixedUserContext(string? userId) : ITrialUserContext
     {
         public string? UserId { get; } = userId;
     }
