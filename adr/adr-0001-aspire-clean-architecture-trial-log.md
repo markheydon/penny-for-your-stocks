@@ -39,7 +39,7 @@ Aspire injects `ConnectionStrings:triallog` (and `TRIALLOG_DATASOURCE`) into Web
 
 **Avoid:** pooled `AddSqliteDbContext`, startup `MigrateAsync()`, warning suppressions for pending model changes, or committed default connection strings.
 
-Project v2 packages (`Aspire.Hosting.Dotnet`, `Aspire.Hosting.EntityFrameworkCore`) use the **13.6.4-preview** line aligned with the AppHost SDK until stable NuGet versions ship.
+The AppHost targets **Aspire 17.0**: `Microsoft.NET.Sdk` with `Aspire.Hosting.AppHost`, stable **`Aspire.Hosting.Dotnet`**, and **`CommunityToolkit.Aspire.Hosting.Sqlite` 17.0.0**. **`Aspire.Hosting.EntityFrameworkCore`** remains on the **17.0.0-preview** line until a stable package ships. C# AppHosts use **`AspireUseCliBundle`** (Aspire CLI supplies DCP and the dashboard).
 
 ### Data persistence (local vs deployed)
 
@@ -68,7 +68,7 @@ Swap AppHost hosting package and Web EF client integration (for example `Aspire.
 ### Negative
 
 - **NEG-001**: More projects and wiring than a monolithic Web app.
-- **NEG-002**: Package surface (Aspire, Community Toolkit, EF, Identity) requires ongoing version alignment with AppHost SDK (currently 13.x).
+- **NEG-002**: Package surface (Aspire, Community Toolkit, EF, Identity) requires ongoing version alignment with the Aspire 17 hosting line (including EF migrations preview packages).
 - **NEG-003**: Passkey RP ID and `ServerDomain` must be configured explicitly for non-local hosts.
 - **NEG-004**: Running **Web without AppHost** requires a local `ConnectionStrings:triallog` (for example user secrets) because no default is committed; normal development should use the AppHost.
 - **NEG-005**: SQLite file must live on **persistent storage** in deployment (`Triallog:DataDirectory` on a volume); deleting `triallog.db` resets all trial and Identity data by design.

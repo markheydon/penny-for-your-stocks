@@ -56,6 +56,11 @@ jobs:
             8.0.x
             10.0.x
 
+      - name: Install Aspire CLI bundle
+        run: |
+          curl -sSL https://aspire.dev/install.sh | bash
+          aspire setup --non-interactive
+
       - name: Clean, restore, build, and test
         run: |
           dotnet clean PennyForYourStocks.slnx

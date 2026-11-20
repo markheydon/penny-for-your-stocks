@@ -14,8 +14,6 @@ else
 Directory.CreateDirectory(triallogDirectory);
 var trialDb = builder.AddSqlite("triallog", triallogDirectory, "triallog.db");
 
-#pragma warning disable ASPIREDOTNETPROJECT001 // Project v2 (AddDotnetProject) is the approved AppHost pattern for this repo.
-#pragma warning disable ASPIREPROJECTS001 // AddEFMigrations on IDotnetProgramResource requires this paired suppression.
 var web = builder.AddDotnetProject("web", "../PennyForYourStocks.Web/PennyForYourStocks.Web.csproj")
     .WithExternalHttpEndpoints()
     .WithHttpHealthCheck("/health")
@@ -29,7 +27,5 @@ var migrations = web
     .WaitFor(trialDb);
 
 web.WaitForCompletion(migrations);
-#pragma warning restore ASPIREPROJECTS001
-#pragma warning restore ASPIREDOTNETPROJECT001
 
 builder.Build().Run();
