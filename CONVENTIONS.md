@@ -13,7 +13,7 @@ Product boundaries (share recommendations, broker integration, market data feeds
 
 ## Project Structure
 
-Clean architecture with Aspire orchestration. Layering and persistence choices are summarised in [adr/adr-0001-aspire-clean-architecture-trial-log.md](adr/adr-0001-aspire-clean-architecture-trial-log.md).
+Clean architecture with Aspire orchestration — see [adr/adr-0001-aspire-clean-architecture-trial-log.md](adr/adr-0001-aspire-clean-architecture-trial-log.md). SQLite paths, migrations, and Aspire resource wiring are described in [README.md](README.md) and [specs/001-written-trial-log/research.md](specs/001-written-trial-log/research.md).
 
 ```
 src/
