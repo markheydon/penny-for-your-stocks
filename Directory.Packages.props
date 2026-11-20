@@ -5,7 +5,7 @@
   <ItemGroup>
     <PackageVersion Include="Aspire.Hosting.Dotnet" Version="13.6.4-preview.1.26523.11" />
     <PackageVersion Include="Aspire.Hosting.EntityFrameworkCore" Version="13.6.4-preview.1.26523.11" />
-    <PackageVersion Include="CommunityToolkit.Aspire.Hosting.Sqlite" Version="13.6.1" />
+    <PackageVersion Include="CommunityToolkit.Aspire.Hosting.Sqlite" Version="17.0.0" />
     <PackageVersion Include="coverlet.collector" Version="10.1.0" />
     <PackageVersion Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="10.0.14" />
     <PackageVersion Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="10.0.14" />
