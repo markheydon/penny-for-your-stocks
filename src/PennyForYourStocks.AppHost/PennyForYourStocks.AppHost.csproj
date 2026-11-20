@@ -13,6 +13,9 @@
     <PackageReference Include="Aspire.Hosting.Dotnet" />
     <PackageReference Include="Aspire.Hosting.EntityFrameworkCore" />
     <PackageReference Include="CommunityToolkit.Aspire.Hosting.Sqlite" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" VersionOverride="10.0.15" />
+    <PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" VersionOverride="1.21.0" />
+    <PackageReference Include="OpenTelemetry.Extensions.Hosting" VersionOverride="1.21.0" />
   </ItemGroup>
 
 </Project>
