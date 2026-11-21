@@ -1,18 +1,17 @@
 version: 2
-
 updates:
   - package-ecosystem: nuget
-    directory: "/"
+    directory: /
     schedule:
       interval: weekly
       day: monday
       time: "04:00"
       timezone: Europe/London
     open-pull-requests-limit: 5
-    assignees:
-      - markheydon
     labels:
       - type/chore
+    assignees:
+      - markheydon
     ignore:
       - dependency-name: "Microsoft.Extensions.*"
         update-types:
@@ -21,7 +20,7 @@ updates:
         update-types:
           - version-update:semver-major
     groups:
-      tests:
+      test-packages:
         patterns:
           - xunit*
           - Microsoft.NET.Test.Sdk
@@ -72,17 +71,17 @@ updates:
           - patch
 
   - package-ecosystem: github-actions
-    directory: "/"
+    directory: /
     schedule:
       interval: weekly
       day: monday
       time: "04:00"
       timezone: Europe/London
     open-pull-requests-limit: 5
-    assignees:
-      - markheydon
     labels:
       - type/chore
+    assignees:
+      - markheydon
     groups:
       github-actions:
         patterns:
@@ -93,17 +92,17 @@ updates:
           - patch
 
   - package-ecosystem: devcontainers
-    directory: "/"
+    directory: /
     schedule:
       interval: weekly
       day: monday
       time: "04:00"
       timezone: Europe/London
     open-pull-requests-limit: 5
-    assignees:
-      - markheydon
     labels:
       - type/chore
+    assignees:
+      - markheydon
     groups:
       devcontainers:
         patterns:
